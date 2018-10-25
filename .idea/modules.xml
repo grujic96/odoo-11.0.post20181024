@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/../../PycharmProjects/FirstProject/.idea/FirstProject.iml" filepath="$PROJECT_DIR$/../../PycharmProjects/FirstProject/.idea/FirstProject.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/odoo-11.0.post20181024.iml" filepath="$PROJECT_DIR$/.idea/odoo-11.0.post20181024.iml" />
     </modules>
   </component>
