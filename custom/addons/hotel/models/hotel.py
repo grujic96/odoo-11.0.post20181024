@@ -6,6 +6,9 @@ from odoo.exceptions import UserError, ValidationError
 from odoo.osv import expression
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT
 from odoo import api, fields, models, _
+import socket
+import threading
+import sys
 
 
 def _offset_format_timestamp1(src_tstamp_str, src_format, dst_format,
@@ -216,6 +219,7 @@ class HotelRoom(models.Model):
     _name = 'hotel.room'
     _description = 'Hotel Room'
 
+
     product_id = fields.Many2one('product.product', 'Product_id',
                                  required=True, delegate=True,
                                  ondelete='cascade')
@@ -235,9 +239,52 @@ class HotelRoom(models.Model):
     room_line_ids = fields.One2many('folio.room.line', 'room_id',
                                     string='Room Reservation Line')
     product_manager = fields.Many2one('res.users', 'Product Manager')
+
     do_not_disturb = fields.Boolean('Do Not disturb')
     sos = fields.Boolean('SOS', default = False)
     sos_status = fields.Selection([('true', 'Ukljucen'), ('false', 'Iskljucen')], 'Sos Status', default='false')
+    poziv_osoblju = fields.Selection([('true', 'gost je pozvao osoblje'), ('false', '')])
+    gost_status = fields.Selection([('true', 'gost je u sobi'), ('false', 'soba je prazna')])
+    broj_sobe = fields.Integer('Broj Sobe')
+
+    @api.one
+    def status_soba(self):
+        #threading.Timer(10.0, status_sobaa).start()
+        i = 0
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sock.bind(('0.0.0.0', 80))
+        while i <= 4:
+            data, address = sock.recvfrom(512)
+            data[2:]
+            self.bin = bin(data[4])
+            databits = self.bin
+            if data[3] == 241:
+                s = databits[2:].zfill(8)
+                print(s)
+                lisener = s[0]
+                if lisener == '1':
+                    self.sos_status = 'true'
+                else:
+                    self.sos_status = 'false'
+
+                if s[1] == '1':
+                    self.poziv_osoblju = 'true'
+                else:
+                    self.poziv_osoblju = 'false'
+                print(s)
+                if s[2] == '1':
+                    self.do_not_disturb = True
+                else:
+                    self.do_not_disturb = False
+                print(s)
+                if s[7] == '1':
+                    self.gost_status = 'true'
+                else:
+                    self.gost_status = 'false'
+            i += 1
+
+
+
 
     @api.constrains('capacity')
     def check_capacity(self):
@@ -252,6 +299,26 @@ class HotelRoom(models.Model):
         if self.sos is False:
             self.sos_status = 'false'
 
+    @api.onchange('gost')
+    def gost_change(self):
+        if self.gost is True:
+            self.gost_status = 'true'
+        if self.gost is False:
+            self.gost_status = 'false'
+
+    @api.onchange('osoblje')
+    def osoblje_change(self):
+        if self.osoblje is True:
+            self.osoblje_status = 'true'
+        if self.osoblje is False:
+            self.osoblje_status = 'false'
+
+   # @api.onchange('sos')
+   # def sos_change(self):
+    #    if self.sos is True:
+     #       self.sos_status = 'true'
+      #  if self.sos is False:
+       #     self.sos_status = 'false'
 
     @api.onchange('isroom')
     def isroom_change(self):
