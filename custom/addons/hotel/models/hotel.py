@@ -1,14 +1,14 @@
 # See LICENSE file for full copyright and licensing details.
 
 import time
+import logging
 import datetime
 from odoo.exceptions import UserError, ValidationError
 from odoo.osv import expression
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT
 from odoo import api, fields, models, _
 import socket
-import threading
-import sys
+_logger = logging.getLogger(__name__)
 
 
 def _offset_format_timestamp1(src_tstamp_str, src_format, dst_format,
@@ -247,41 +247,61 @@ class HotelRoom(models.Model):
     gost_status = fields.Selection([('true', 'gost je u sobi'), ('false', 'soba je prazna')])
     broj_sobe = fields.Integer('Broj Sobe')
 
-    @api.one
+
+
+
+
     def status_soba(self):
+        rooms = self.env['hotel.room'].search([])
+
+
         #threading.Timer(10.0, status_sobaa).start()
         i = 0
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.bind(('0.0.0.0', 80))
-        while i <= 4:
+        while i <= 3:
             data, address = sock.recvfrom(512)
-            data[2:]
-            self.bin = bin(data[4])
-            databits = self.bin
+            print(data)
             if data[3] == 241:
-                s = databits[2:].zfill(8)
-                print(s)
-                lisener = s[0]
-                if lisener == '1':
-                    self.sos_status = 'true'
-                else:
-                    self.sos_status = 'false'
+                data[2:]
+                for room in rooms:
+                    a = room.broj_sobe
+                    self.bin = bin(data[a * 4])
+                    databits = self.bin
+                    s = databits[2:].zfill(8)
+                    print(s)
+                    listener = s[0]
+                    if listener == '1':
+                        room.sos_status = 'true'
+                    else:
+                        room.sos_status = 'false'
 
-                if s[1] == '1':
-                    self.poziv_osoblju = 'true'
-                else:
-                    self.poziv_osoblju = 'false'
-                print(s)
-                if s[2] == '1':
-                    self.do_not_disturb = True
-                else:
-                    self.do_not_disturb = False
-                print(s)
-                if s[7] == '1':
-                    self.gost_status = 'true'
-                else:
-                    self.gost_status = 'false'
-            i += 1
+                    if s[1] == '1':
+                        room.poziv_osoblju = 'true'
+                    else:
+                        room.poziv_osoblju = 'false'
+                    if s[2] == '1':
+                        room.do_not_disturb = True
+                    else:
+                        room.do_not_disturb = False
+                    if s[7] == '1':
+                        room.gost_status = 'true'
+                    else:
+                        room.gost_status = 'false'
+                i += 1
+
+
+
+
+
+    @api.multi
+    def lista_brojeva_soba(self):
+        brojevi = []
+        for soba in self:
+            brojevi.append(soba.broj_sobe)
+        print(brojevi)
+
+        return brojevi
 
 
 
@@ -292,26 +312,7 @@ class HotelRoom(models.Model):
             if room.capacity <= 0:
                 raise ValidationError(_('Room capacity must be more than 0'))
 
-    @api.onchange('sos')
-    def sos_change(self):
-        if self.sos is True:
-            self.sos_status = 'true'
-        if self.sos is False:
-            self.sos_status = 'false'
 
-    @api.onchange('gost')
-    def gost_change(self):
-        if self.gost is True:
-            self.gost_status = 'true'
-        if self.gost is False:
-            self.gost_status = 'false'
-
-    @api.onchange('osoblje')
-    def osoblje_change(self):
-        if self.osoblje is True:
-            self.osoblje_status = 'true'
-        if self.osoblje is False:
-            self.osoblje_status = 'false'
 
    # @api.onchange('sos')
    # def sos_change(self):

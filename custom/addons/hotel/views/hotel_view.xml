@@ -279,6 +279,10 @@
                         <h1>
                             <field name="name" />
                         </h1>
+                         <label for="broj_sobe" string="Broj Sobe" />
+                        <h1>
+                            <field name="broj_sobe" />
+                        </h1>
                         <label for="status" string="Status" />
                         <h2>
                             <field name="status" readonly="1" />
@@ -292,7 +296,6 @@
                             <group colspan="4" col="4">
                                 <field name="floor_id" string="Floor" />
                                 <field name="categ_id" select="1" />
-                                <field name="broj_sobe" />
                                 <field name="product_manager" select="2" string="Room Manager" />
                                 <field name="capacity" />
                                 <field name="do_not_disturb"/>
@@ -388,13 +391,13 @@
             <tree string="Hotel Room">
 
                 <field name="name" />
-                <field name="broj_sobe" />
                 <field name="categ_id" />
                 <field name="list_price" string="Room rate" />
                 <field name="status" />
                 <field name="capacity" />
                 <field name="do_not_disturb" />
                 <field name="sos_status" />
+
             </tree>
         </field>
     </record>
@@ -490,7 +493,8 @@
 
 
     <!-- Tree view of hotel room status -->
-    <record id="view_hotel_room_status_tree" model="ir.ui.view" refresh="10">
+    <record id="view_hotel_room_status_tree" model="ir.ui.view">
+
         <field name="name">hotel.room.tree</field>
         <field name="model">hotel.room</field>
         <field name="arch" type="xml">
@@ -500,14 +504,14 @@
                 <field name="list_price" string="Room rate" />
                 <field name="status" />
                 <field name="do_not_disturb" />
-                <field name="sos_status" />
-                <field name="poziv_osoblju" />
+                <field name="sos_status"/>
+                <field name="poziv_osoblju"/>
                 <field name="gost_status" string="Gost"/>
-                <button name="status_soba" string="Refresh"
-                         type="object" class="oe_highlight" />
-            </tree>
-        </field>
+                <button name="status_soba" string="Refresh" type="object" class="oe_highlight"/>
 
+            </tree>
+
+        </field>
     </record>
 
 
@@ -537,8 +541,20 @@
         <field name="view_mode">kanban,tree,form</field>
     </record>
 
+    <record model="ir.actions.server" id="action_hotel_room_refresh_form">
+        <field name="name">refresh.hotel.room_status</field>
+        <field name="model_id" ref="model_hotel_room"/>
+        <field name="code">model.status_soba()
+        </field>
+
+
+    </record>
+
+
     <menuitem id="menu_open_hotel_room_status_form" name="Room_Status"
         action="action_hotel_room_status_form" sequence="6" parent="hotel.menu_hotel_room" />
+    <menuitem id="menu_open_hotel_room_refresh_form" name="Refresh"
+        action="action_hotel_room_refresh_form" sequence="7" parent="hotel.menu_hotel_room" />
 
 
 
