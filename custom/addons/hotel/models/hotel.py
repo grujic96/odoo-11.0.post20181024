@@ -9,7 +9,6 @@ from odoo import api, fields, models, _
 import socket
 _logger = logging.getLogger(__name__)
 
-
 def _offset_format_timestamp1(src_tstamp_str, src_format, dst_format,
                               ignore_unparsable_time=True, context=None):
     """
@@ -252,13 +251,13 @@ class HotelRoom(models.Model):
 
     def status_soba(self):
         rooms = self.env['hotel.room'].search([])
-
+        #self.env['bus.bus'].sendone('auto_refresh', self._name)
 
         #threading.Timer(10.0, status_sobaa).start()
         i = 0
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.bind(('0.0.0.0', 80))
-        while i <= 3:
+        while i<=0:
             data, address = sock.recvfrom(512)
             print(data)
             if data[3] == 241:

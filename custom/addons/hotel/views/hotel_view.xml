@@ -646,6 +646,9 @@
     </record>
 
 
+
+
+
     <menuitem id="menu_open_hotel_room_status_form" name="Room_Status"
         action="action_hotel_room_status_form" sequence="6" parent="hotel.menu_hotel_room" />
     <menuitem id="menu_open_hotel_room_refresh_form" name="Refresh"
