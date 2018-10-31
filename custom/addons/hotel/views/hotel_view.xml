@@ -652,9 +652,10 @@
         <field name="model">hotel.room.status.change</field>
         <field name="arch" type="xml">
             <tree string="Hotel Room">
+                <field name="broj_sobe" />
                 <field name="ime_statusa" />
                 <field name="time_of_change"  />
-                <field name="broj_sobe" />
+
 
             </tree>
 

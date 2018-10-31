@@ -221,8 +221,8 @@ class HotelRoomStatusChangeHistory(models.Model):
     room_status_change_id = fields.Many2one('hotel.room', 'Hotel Room id')
     time_of_change = fields.Datetime('Vreme Promene')
     broj_sobe = fields.Integer("Broj sobe")
-    ime_statusa = fields.Selection([('sos_status', 'Sos_status'), ('do_not_disturb', 'Do not disturb')], 'Promenjeni status')
-
+    #ime_statusa = fields.Selection([('sos_status', 'Sos_status'), ('do_not_disturb', 'Do not disturb')], 'Promenjeni status')
+    ime_statusa = fields.Char('Promenjeni status')
 
 class HotelRoom(models.Model):
 
@@ -264,12 +264,20 @@ class HotelRoom(models.Model):
         asd = self.env['hotel.room'].search([("broj_sobe",'=',self.broj_sobe)])
         return asd.id
 
-    def do_not_disturb_change(self):
+    def do_not_disturb_change(self, on_off):
             self.env['hotel.room.status.change'].create({
                 'room_status_change_id': self.id_by_broj_sobe(),
                 'time_of_change': datetime.datetime.now(),
                 'broj_sobe': self.broj_sobe,
-                'ime_statusa': 'do_not_disturb'
+                'ime_statusa': 'do_not_disturb ' + on_off
+            })
+
+    def poziv_osoblju_change(self, asd):
+            self.env['hotel.room.status.change'].create({
+                'room_status_change_id': self.id_by_broj_sobe(),
+                'time_of_change': datetime.datetime.now(),
+                'broj_sobe': self.broj_sobe,
+                'ime_statusa': 'Poziv osoblju ' + asd
             })
 
     # @api.onchange('gost_status')
@@ -316,11 +324,11 @@ class HotelRoom(models.Model):
                         if room.do_not_disturb:
                             room.do_not_disturb = True
                         else:
-                            room.do_not_disturb_change()
+                            room.do_not_disturb_change('Ukljucen')
                             room.do_not_disturb = True
                     else:
                         if room.do_not_disturb:
-                            room.do_not_disturb_change()
+                            room.do_not_disturb_change('Iskljucen')
                             room.do_not_disturb = False
                         else:
                             room.do_not_disturb
