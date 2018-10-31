@@ -221,8 +221,7 @@ class HotelRoomStatusChangeHistory(models.Model):
     room_status_change_id = fields.Many2one('hotel.room', 'Hotel Room id')
     time_of_change = fields.Datetime('Vreme Promene')
     broj_sobe = fields.Integer("Broj sobe")
-    ime_statusa = fields.Selection([('sos_status', 'Sos_status'), ('do_not_disturb', 'Do not disturb')])
-
+    ime_statusa = fields.Selection([('sos_status', 'Sos_status'), ('do_not_disturb', 'Do not disturb')], 'Promenjeni status')
 
 
 class HotelRoom(models.Model):
@@ -261,16 +260,31 @@ class HotelRoom(models.Model):
     broj_sobe = fields.Integer('Broj Sobe')
 
 
+    def id_by_broj_sobe(self):
+        asd = self.env['hotel.room'].search([("broj_sobe",'=',self.broj_sobe)])
+        return asd.id
+
     @api.onchange('do_not_disturb')
     def do_not_disturb_change(self):
         for rec in self:
             self.env['hotel.room.status.change'].create({
-                'room_status_change_id': rec.id,
+                'room_status_change_id': rec.id_by_broj_sobe(),
                 'time_of_change': datetime.datetime.now(),
                 'broj_sobe': rec.broj_sobe,
                 'ime_statusa': 'do_not_disturb'
             })
-    
+
+    # @api.onchange('gost_status')
+    # def do_not_disturb_change(self):
+    #     for rec in self:
+    #         self.env['hotel.room.status.change'].create({
+    #             'room_status_change_id': rec.id_by_broj_sobe(),
+    #             'time_of_change': datetime.datetime.now(),
+    #             'broj_sobe': rec.broj_sobe,
+    #             'ime_statusa': 'gost_status'
+    #
+    #         })
+
     def status_soba(self):
         rooms = self.env['hotel.room'].search([])
         #self.env['bus.bus'].sendone('auto_refresh', self._name)
