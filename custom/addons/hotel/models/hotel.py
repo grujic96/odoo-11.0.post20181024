@@ -211,6 +211,19 @@ class FolioRoomLine(models.Model):
     folio_id = fields.Many2one('hotel.folio', string='Folio Number')
     status = fields.Selection(string='state', related='folio_id.state')
 
+#model za istoriju promene statusa
+
+
+class HotelRoomStatusChangeHistory(models.Model):
+    _name = 'hotel.room.status.change'
+    _description = 'Hotel Room Status Change'
+
+    room_status_change_id = fields.Many2one('hotel.room', 'Hotel Room id')
+    time_of_change = fields.Datetime('Vreme Promene')
+    broj_sobe = fields.Integer("Broj sobe")
+    ime_statusa = fields.Selection([('sos_status', 'Sos_status'), ('do_not_disturb', 'Do not disturb')])
+
+
 
 class HotelRoom(models.Model):
 
@@ -238,6 +251,8 @@ class HotelRoom(models.Model):
                                     string='Room Reservation Line')
     product_manager = fields.Many2one('res.users', 'Product Manager')
 
+    #promena statusa
+    hotel_room_status_change_id = fields.One2many('hotel.room.status.change' , 'room_status_change_id')
     do_not_disturb = fields.Boolean('Do Not disturb')
     sos = fields.Boolean('SOS', default = False)
     sos_status = fields.Selection([('true', 'Ukljucen'), ('false', 'Iskljucen')], 'Sos Status', default='false')
@@ -246,9 +261,16 @@ class HotelRoom(models.Model):
     broj_sobe = fields.Integer('Broj Sobe')
 
 
-
-
-
+    @api.onchange('do_not_disturb')
+    def do_not_disturb_change(self):
+        for rec in self:
+            self.env['hotel.room.status.change'].create({
+                'room_status_change_id': rec.id,
+                'time_of_change': datetime.datetime.now(),
+                'broj_sobe': rec.broj_sobe,
+                'ime_statusa': 'do_not_disturb'
+            })
+    
     def status_soba(self):
         rooms = self.env['hotel.room'].search([])
         #self.env['bus.bus'].sendone('auto_refresh', self._name)
@@ -286,7 +308,7 @@ class HotelRoom(models.Model):
                         room.gost_status = 'true'
                     else:
                         room.gost_status = 'false'
-                i += 1
+            i += 1
 
 
 

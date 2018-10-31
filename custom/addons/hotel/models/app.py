@@ -2,8 +2,13 @@ import socket
 import threading
 
 
-import websocket
-
-ws = websocket.WebSocket()
-ws.connect("ws://localhost:8069", http_proxy_host="localhost", http_proxy_port=3128)
-
+i = 0
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+sock.bind(('0.0.0.0', 80))
+while i<=2:
+    print('proso')
+    data, address = sock.recvfrom(512)
+    print(data)
+    if data[3] == 241:
+        print(data)
+    i += 1
