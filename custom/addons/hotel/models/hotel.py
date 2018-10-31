@@ -264,13 +264,11 @@ class HotelRoom(models.Model):
         asd = self.env['hotel.room'].search([("broj_sobe",'=',self.broj_sobe)])
         return asd.id
 
-    @api.onchange('do_not_disturb')
     def do_not_disturb_change(self):
-        for rec in self:
             self.env['hotel.room.status.change'].create({
-                'room_status_change_id': rec.id_by_broj_sobe(),
+                'room_status_change_id': self.id_by_broj_sobe(),
                 'time_of_change': datetime.datetime.now(),
-                'broj_sobe': rec.broj_sobe,
+                'broj_sobe': self.broj_sobe,
                 'ime_statusa': 'do_not_disturb'
             })
 
@@ -293,7 +291,7 @@ class HotelRoom(models.Model):
         i = 0
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.bind(('0.0.0.0', 80))
-        while i<=0:
+        while i<=2:
             data, address = sock.recvfrom(512)
             print(data)
             if data[3] == 241:
@@ -315,9 +313,17 @@ class HotelRoom(models.Model):
                     else:
                         room.poziv_osoblju = 'false'
                     if s[2] == '1':
-                        room.do_not_disturb = True
+                        if room.do_not_disturb:
+                            room.do_not_disturb = True
+                        else:
+                            room.do_not_disturb_change()
+                            room.do_not_disturb = True
                     else:
-                        room.do_not_disturb = False
+                        if room.do_not_disturb:
+                            room.do_not_disturb_change()
+                            room.do_not_disturb = False
+                        else:
+                            room.do_not_disturb
                     if s[7] == '1':
                         room.gost_status = 'true'
                     else:
