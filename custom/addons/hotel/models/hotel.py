@@ -272,12 +272,28 @@ class HotelRoom(models.Model):
                 'ime_statusa': 'do_not_disturb ' + on_off
             })
 
-    def poziv_osoblju_change(self, asd):
+    def poziv_osoblju_change(self, on_off):
             self.env['hotel.room.status.change'].create({
                 'room_status_change_id': self.id_by_broj_sobe(),
                 'time_of_change': datetime.datetime.now(),
                 'broj_sobe': self.broj_sobe,
-                'ime_statusa': 'Poziv osoblju ' + asd
+                'ime_statusa': 'Poziv osoblju ' + on_off
+            })
+
+    def sos_status_change(self, on_off):
+            self.env['hotel.room.status.change'].create({
+                'room_status_change_id': self.id_by_broj_sobe(),
+                'time_of_change': datetime.datetime.now(),
+                'broj_sobe': self.broj_sobe,
+                'ime_statusa': 'Sos ' + on_off
+            })
+
+    def gost_status_change(self, on_off):
+            self.env['hotel.room.status.change'].create({
+                'room_status_change_id': self.id_by_broj_sobe(),
+                'time_of_change': datetime.datetime.now(),
+                'broj_sobe': self.broj_sobe,
+                'ime_statusa': on_off
             })
 
     # @api.onchange('gost_status')
@@ -310,16 +326,32 @@ class HotelRoom(models.Model):
                     databits = self.bin
                     s = databits[2:].zfill(8)
                     print(s)
-                    listener = s[0]
-                    if listener == '1':
-                        room.sos_status = 'true'
+                    if s[0] == '1':
+                        if room.sos_status =='false':
+                            room.sos_status_change
+                            room.sos_status = 'true'
+                        else:
+                            room.sos_status = 'true'
+
                     else:
-                        room.sos_status = 'false'
+                        if room.sos_status == 'true':
+                            room.sos_status_change
+                            room.sos_status = 'false'
+                        else:
+                            room.sos_status == 'false'
 
                     if s[1] == '1':
-                        room.poziv_osoblju = 'true'
+                        if room.poziv_osoblju == 'false':
+                            room.poziv_osoblju_change('Ukljucen')
+                            room.poziv_osoblju = 'true'
+                        else:
+                            room.poziv_osoblju = 'true'
                     else:
-                        room.poziv_osoblju = 'false'
+                        if room.poziv_osoblju == 'true':
+                            room.poziv_osoblju_change('Iskljucen')
+                            room.poziv_osoblju = 'false'
+                        else:
+                            room.poziv_osoblju = 'false'
                     if s[2] == '1':
                         if room.do_not_disturb:
                             room.do_not_disturb = True
@@ -331,11 +363,19 @@ class HotelRoom(models.Model):
                             room.do_not_disturb_change('Iskljucen')
                             room.do_not_disturb = False
                         else:
-                            room.do_not_disturb
+                            room.do_not_disturb = False
                     if s[7] == '1':
-                        room.gost_status = 'true'
+                        if room.gost_status == 'true':
+                            room.gost_status == 'true'
+                        else:
+                            room.gost_status_change('gost je uso u sobu')
+                            room.gost_status = 'true'
                     else:
-                        room.gost_status = 'false'
+                        if room.gost_status == 'false':
+                            room.gost_status == 'false'
+                        else:
+                            room.gost_status_change('gost je izaso iz sobe')
+                            room.gost_status = 'false'
             i += 1
 
 
