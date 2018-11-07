@@ -2,6 +2,8 @@
 import time
 import logging
 import datetime
+import threading
+from threading import Thread
 from odoo.exceptions import UserError, ValidationError
 from odoo.osv import expression
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT
@@ -214,6 +216,7 @@ class FolioRoomLine(models.Model):
 #model za istoriju promene statusa
 
 
+
 class HotelRoomStatusChangeHistory(models.Model):
     _name = 'hotel.room.status.change'
     _description = 'Hotel Room Status Change'
@@ -307,17 +310,19 @@ class HotelRoom(models.Model):
     #
     #         })
 
-    def status_soba(self):
-        rooms = self.env['hotel.room'].search([])
-        #self.env['bus.bus'].sendone('auto_refresh', self._name)
 
+    @api.multi
+    def status_soba(self):
+        #self.env['bus.bus'].sendone('auto_refresh', self._name)
         #threading.Timer(10.0, status_sobaa).start()
         i = 0
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.bind(('0.0.0.0', 80))
-        while i<=2:
+        while True:
             data, address = sock.recvfrom(512)
+            rooms = self.env['hotel.room'].search([])
             print(data)
+
             if data[3] == 241:
                 data[2:]
                 for room in rooms:
@@ -329,58 +334,51 @@ class HotelRoom(models.Model):
                     if s[0] == '1':
                         if room.sos_status =='false':
                             room.sos_status_change
-                            room.sos_status = 'true'
-                        else:
+
                             room.sos_status = 'true'
 
                     else:
                         if room.sos_status == 'true':
                             room.sos_status_change
                             room.sos_status = 'false'
-                        else:
-                            room.sos_status == 'false'
 
                     if s[1] == '1':
                         if room.poziv_osoblju == 'false':
                             room.poziv_osoblju_change('Ukljucen')
                             room.poziv_osoblju = 'true'
-                        else:
-                            room.poziv_osoblju = 'true'
                     else:
                         if room.poziv_osoblju == 'true':
                             room.poziv_osoblju_change('Iskljucen')
                             room.poziv_osoblju = 'false'
-                        else:
-                            room.poziv_osoblju = 'false'
                     if s[2] == '1':
-                        if room.do_not_disturb:
-                            room.do_not_disturb = True
-                        else:
+                        if room.do_not_disturb is  False:
                             room.do_not_disturb_change('Ukljucen')
                             room.do_not_disturb = True
+                            time.sleep(20)
+
                     else:
                         if room.do_not_disturb:
                             room.do_not_disturb_change('Iskljucen')
-                            room.do_not_disturb = False
-                        else:
-                            room.do_not_disturb = False
+                            room.write({'do_not_disturb':False})
+                            time.sleep(20)
                     if s[7] == '1':
-                        if room.gost_status == 'true':
-                            room.gost_status == 'true'
-                        else:
+                        if room.gost_status == 'false':
                             room.gost_status_change('gost je uso u sobu')
                             room.gost_status = 'true'
                     else:
-                        if room.gost_status == 'false':
-                            room.gost_status == 'false'
-                        else:
+                        if room.gost_status == 'true':
                             room.gost_status_change('gost je izaso iz sobe')
                             room.gost_status = 'false'
+
             i += 1
+           # time.sleep(5)
 
 
 
-
+    @api.one
+    def auto_refresh(self):
+        model = self.env['hotel.room']
+        model.env['bus.bus'].sendone('auto_refresh', model._name)
 
     @api.multi
     def lista_brojeva_soba(self):
@@ -454,6 +452,28 @@ class HotelRoom(models.Model):
         @param self: object pointer
         """
         return self.write({'isroom': True, 'color': 5})
+
+    # def __init__(self, cr ,ir):
+    #
+    #     thread = threading.Thread(target=self.run, args=())
+    #     thread.daemon = True  # Daemonize thread
+    #     thread.start()  # Start the execution
+    # @api.multi
+    # def run(self):
+    #     """ Method that runs forever """
+    #     while True:
+    #         self.status_soba()
+    #         print('doso')
+    #         print('proso')
+    #         print('Doing something imporant in the background')
+    #
+    #         time.sleep(self.interval)
+
+# example = HotelRoom()
+# time.sleep(7)
+# print('Checkpoint')
+# time.sleep(7)
+# print('Bye')
 
 
 class HotelFolio(models.Model):
@@ -1287,3 +1307,11 @@ class AccountInvoice(models.Model):
             folio.write({'hotel_invoice_id': res.id,
                          'invoice_status': 'invoiced'})
         return res
+class RoomStatus(models.Model):
+    _name = 'room.status'
+
+    do_not_disturb = fields.Boolean('Do Not disturb')
+    sos_status = fields.Selection([('true', 'Ukljucen'), ('false', 'Iskljucen')], 'Sos Status', default='false')
+    poziv_osoblju = fields.Selection([('true', 'gost je pozvao osoblje'), ('false', '')])
+    gost_status = fields.Selection([('true', 'gost je u sobi'), ('false', 'soba je prazna')])
+    broj_sobe = fields.Integer('Broj Sobe')
