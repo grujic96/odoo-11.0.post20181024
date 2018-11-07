@@ -1,0 +1,360 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+#	* muk_webhooks
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 12.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-10-09 14:10+0000\n"
+"PO-Revision-Date: 2018-10-09 14:10+0000\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: muk_webhooks
+#: selection:ir.actions.server,webhook_grant:0
+msgid " Client Credentials"
+msgstr ""
+
+#. module: muk_webhooks
+#: model_terms:ir.ui.view,arch_db:muk_webhooks.view_server_action_form
+msgid "<code>Warning</code>: Warning Exception to use with <code>raise</code>"
+msgstr ""
+
+#. module: muk_webhooks
+#: model_terms:ir.ui.view,arch_db:muk_webhooks.view_server_action_form
+msgid "<code>date_format</code>, <code>datetime_format</code>: server date and time formats"
+msgstr ""
+
+#. module: muk_webhooks
+#: model_terms:ir.ui.view,arch_db:muk_webhooks.view_server_action_form
+msgid "<code>dump(content)</code>: dumps content into a json string and takes care of converting dates and records"
+msgstr ""
+
+#. module: muk_webhooks
+#: model_terms:ir.ui.view,arch_db:muk_webhooks.view_server_action_form
+msgid "<code>env</code>: Odoo Environment on which the action is triggered"
+msgstr ""
+
+#. module: muk_webhooks
+#: model_terms:ir.ui.view,arch_db:muk_webhooks.view_server_action_form
+msgid "<code>log(message, level='info')</code>: logging function to record debug information in <code>ir.logging</code> table"
+msgstr ""
+
+#. module: muk_webhooks
+#: model_terms:ir.ui.view,arch_db:muk_webhooks.view_server_action_form
+msgid "<code>model</code>: Odoo Model of the record on which the action is triggered; is a void recordset"
+msgstr ""
+
+#. module: muk_webhooks
+#: model_terms:ir.ui.view,arch_db:muk_webhooks.view_server_action_form
+msgid "<code>record</code>: record on which the action is triggered; may be be void"
+msgstr ""
+
+#. module: muk_webhooks
+#: model_terms:ir.ui.view,arch_db:muk_webhooks.view_server_action_form
+msgid "<code>records</code>: recordset of all records on which the action is triggered in multi mode; may be void"
+msgstr ""
+
+#. module: muk_webhooks
+#: model_terms:ir.ui.view,arch_db:muk_webhooks.view_server_action_form
+msgid "<code>request</code>: Request send by the action"
+msgstr ""
+
+#. module: muk_webhooks
+#: model_terms:ir.ui.view,arch_db:muk_webhooks.view_server_action_form
+msgid "<code>response</code>: Response received when the request was sent"
+msgstr ""
+
+#. module: muk_webhooks
+#: model_terms:ir.ui.view,arch_db:muk_webhooks.view_server_action_form
+msgid "<code>time</code>, <code>datetime</code>, <code>dateutil</code>, <code>timezone</code>: useful Python libraries"
+msgstr ""
+
+#. module: muk_webhooks
+#: model_terms:ir.ui.view,arch_db:muk_webhooks.view_server_action_form
+msgid "<code>user</code>: User who triggered the action"
+msgstr ""
+
+#. module: muk_webhooks
+#: model:ir.model.fields,field_description:muk_webhooks.field_ir_actions_server__webhook_token
+msgid "Access Token"
+msgstr ""
+
+#. module: muk_webhooks
+#: model:ir.model.fields,field_description:muk_webhooks.field_ir_actions_server__state
+msgid "Action To Do"
+msgstr ""
+
+#. module: muk_webhooks
+#: selection:ir.actions.server,state:0
+msgid "Add Followers"
+msgstr ""
+
+#. module: muk_webhooks
+#: model:ir.model.fields,field_description:muk_webhooks.field_ir_actions_server__webhook_address
+msgid "Address"
+msgstr ""
+
+#. module: muk_webhooks
+#: model:ir.model.fields,field_description:muk_webhooks.field_ir_actions_server__webhook_authentication
+#: model_terms:ir.ui.view,arch_db:muk_webhooks.view_server_action_form
+msgid "Authentication"
+msgstr ""
+
+#. module: muk_webhooks
+#: model:ir.actions.act_window,name:muk_webhooks.action_webhook_automation
+#: model:ir.ui.menu,name:muk_webhooks.menu_webhook_automation
+msgid "Automated Webhooks"
+msgstr ""
+
+#. module: muk_webhooks
+#: selection:ir.actions.server,webhook_authentication:0
+msgid "Basic"
+msgstr ""
+
+#. module: muk_webhooks
+#: model:ir.model.fields,field_description:muk_webhooks.field_ir_actions_server__webhook_client_key
+msgid "Client Key"
+msgstr ""
+
+#. module: muk_webhooks
+#: model:ir.model.fields,field_description:muk_webhooks.field_ir_actions_server__webhook_client_secret
+msgid "Client Secret"
+msgstr ""
+
+#. module: muk_webhooks
+#: selection:ir.actions.server,state:0
+msgid "Create Next Activity"
+msgstr ""
+
+#. module: muk_webhooks
+#: model_terms:ir.actions.act_window,help:muk_webhooks.action_webhook_automation
+msgid "Create a new Automated Webhook"
+msgstr ""
+
+#. module: muk_webhooks
+#: selection:ir.actions.server,state:0
+msgid "Create a new Record"
+msgstr ""
+
+#. module: muk_webhooks
+#: selection:ir.actions.server,webhook_method:0
+msgid "DELETE"
+msgstr ""
+
+#. module: muk_webhooks
+#: selection:ir.actions.server,webhook_authentication:0
+msgid "Digest"
+msgstr ""
+
+#. module: muk_webhooks
+#: selection:ir.actions.server,state:0
+msgid "Execute Python Code"
+msgstr ""
+
+#. module: muk_webhooks
+#: selection:ir.actions.server,state:0
+msgid "Execute several actions"
+msgstr ""
+
+#. module: muk_webhooks
+#: model:ir.model.fields,field_description:muk_webhooks.field_ir_actions_server__webhook_fields
+#: model_terms:ir.ui.view,arch_db:muk_webhooks.view_server_action_form
+msgid "Fields"
+msgstr ""
+
+#. module: muk_webhooks
+#: selection:ir.actions.server,webhook_method:0
+msgid "GET"
+msgstr ""
+
+#. module: muk_webhooks
+#: model:ir.model.fields,field_description:muk_webhooks.field_ir_actions_server__webhook_grant
+msgid "Grant Type"
+msgstr ""
+
+#. module: muk_webhooks
+#: model_terms:ir.ui.view,arch_db:muk_webhooks.view_server_action_form
+msgid "Help"
+msgstr ""
+
+#. module: muk_webhooks
+#: model_terms:ir.ui.view,arch_db:muk_webhooks.view_server_action_form
+msgid "It is possible to intervene in the process at two points. Once before the request is sent.\n"
+"							 	In the tab \"Payload\" Python code can be written. In addition, fields can be defined, which\n"
+"							 	are then automatically appended to the request. In a second step the received response can\n"
+"							 	be processed. Therefore Python code can also be written in the tab \"Process\". This receives\n"
+"							 	the response as context. Both options are optinal. The easiest way to add Webhook is that you can simply\n"
+"							 	enter a URL in the address field and leave all other settings as default."
+msgstr ""
+
+#. module: muk_webhooks
+#: model:ir.model.fields,field_description:muk_webhooks.field_ir_actions_server__webhook_method
+msgid "Method"
+msgstr ""
+
+#. module: muk_webhooks
+#: selection:ir.actions.server,webhook_authentication:0
+msgid "OAuth1"
+msgstr ""
+
+#. module: muk_webhooks
+#: selection:ir.actions.server,webhook_authentication:0
+msgid "OAuth2"
+msgstr ""
+
+#. module: muk_webhooks
+#: selection:ir.actions.server,webhook_method:0
+msgid "POST"
+msgstr ""
+
+#. module: muk_webhooks
+#: selection:ir.actions.server,webhook_method:0
+msgid "PUT"
+msgstr ""
+
+#. module: muk_webhooks
+#: model:ir.model.fields,field_description:muk_webhooks.field_ir_actions_server__webhook_password
+msgid "Password"
+msgstr ""
+
+#. module: muk_webhooks
+#: selection:ir.actions.server,webhook_grant:0
+msgid "Password Credentials"
+msgstr ""
+
+#. module: muk_webhooks
+#: model:ir.model.fields,field_description:muk_webhooks.field_ir_actions_server__webhook_path
+msgid "Path to Certificate"
+msgstr ""
+
+#. module: muk_webhooks
+#: model:ir.model.fields,field_description:muk_webhooks.field_ir_actions_server__webhook_payload
+#: model_terms:ir.ui.view,arch_db:muk_webhooks.view_server_action_form
+msgid "Payload"
+msgstr ""
+
+#. module: muk_webhooks
+#: model_terms:ir.ui.view,arch_db:muk_webhooks.view_server_action_form
+msgid "Please set a model before adding fields to the action."
+msgstr ""
+
+#. module: muk_webhooks
+#: model:ir.model.fields,field_description:muk_webhooks.field_ir_actions_server__webhook_process
+#: model_terms:ir.ui.view,arch_db:muk_webhooks.view_server_action_form
+msgid "Process"
+msgstr ""
+
+#. module: muk_webhooks
+#: selection:ir.actions.server,webhook_authentication:0
+msgid "Public"
+msgstr ""
+
+#. module: muk_webhooks
+#: model:ir.model.fields,field_description:muk_webhooks.field_ir_actions_server__webhook_resource_owner_key
+msgid "Resource Key"
+msgstr ""
+
+#. module: muk_webhooks
+#: model:ir.model.fields,field_description:muk_webhooks.field_ir_actions_server__webhook_resource_owner_secret
+msgid "Resource Secret"
+msgstr ""
+
+#. module: muk_webhooks
+#: model_terms:ir.ui.view,arch_db:muk_webhooks.view_server_action_form
+msgid "SSL"
+msgstr ""
+
+#. module: muk_webhooks
+#: model:ir.model.fields,field_description:muk_webhooks.field_ir_actions_server__webhook_secure
+msgid "Secure"
+msgstr ""
+
+#. module: muk_webhooks
+#: selection:ir.actions.server,state:0
+msgid "Send Email"
+msgstr ""
+
+#. module: muk_webhooks
+#: model:ir.model,name:muk_webhooks.model_ir_actions_server
+msgid "Server Action"
+msgstr ""
+
+#. module: muk_webhooks
+#: model_terms:ir.ui.view,arch_db:muk_webhooks.view_server_action_form
+msgid "The following variables can be used in the python code:"
+msgstr ""
+
+#. module: muk_webhooks
+#: model:ir.model.fields,field_description:muk_webhooks.field_ir_actions_server__webhook_timeout
+msgid "Timeout"
+msgstr ""
+
+#. module: muk_webhooks
+#: model_terms:ir.ui.view,arch_db:muk_webhooks.view_server_action_form
+msgid "To extend the playload, assign: <code>content = {...}</code>"
+msgstr ""
+
+#. module: muk_webhooks
+#: selection:ir.actions.server,webhook_authentication:0
+msgid "Token"
+msgstr ""
+
+#. module: muk_webhooks
+#: model:ir.model.fields,field_description:muk_webhooks.field_ir_actions_server__webhook_token_url
+msgid "Token URL"
+msgstr ""
+
+#. module: muk_webhooks
+#: model:ir.model.fields,help:muk_webhooks.field_ir_actions_server__state
+msgid "Type of server action. The following values are available:\n"
+"- 'Execute Python Code': a block of python code that will be executed\n"
+"- 'Create or Copy a new Record': create a new record with new values, or copy an existing record in your database\n"
+"- 'Write on a Record': update the values of a record\n"
+"- 'Execute several actions': define an action that triggers several other server actions\n"
+"- 'Add Followers': add followers to a record (available in Discuss)\n"
+"- 'Send Email': automatically send an email (available in email_template)"
+msgstr ""
+
+#. module: muk_webhooks
+#: selection:ir.actions.server,state:0
+msgid "Update the Record"
+msgstr ""
+
+#. module: muk_webhooks
+#: model:ir.model.fields,field_description:muk_webhooks.field_ir_actions_server__webhook_user
+msgid "User"
+msgstr ""
+
+#. module: muk_webhooks
+#: model:ir.model.fields,field_description:muk_webhooks.field_ir_actions_server__webhook_verify
+msgid "Verify"
+msgstr ""
+
+#. module: muk_webhooks
+#: selection:ir.actions.server,state:0
+msgid "Webhook"
+msgstr ""
+
+#. module: muk_webhooks
+#: code:addons/muk_webhooks/models/ir_actions.py:300
+#, python-format
+msgid "Webhook validation has failed!"
+msgstr ""
+
+#. module: muk_webhooks
+#: model_terms:ir.ui.view,arch_db:muk_webhooks.view_server_action_form
+msgid "Webhooks"
+msgstr ""
+
+#. module: muk_webhooks
+#: model_terms:ir.actions.act_window,help:muk_webhooks.action_webhook_automation
+#: model_terms:ir.ui.view,arch_db:muk_webhooks.view_server_action_form
+msgid "Webhooks are user-defined HTTP callbacks that can be used to perform push notifications."
+msgstr ""
+

@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--     
+	Copyright (C) 2017 MuK IT GmbH
+	
+    Odoo Proprietary License v1.0
+
+	This software and associated files (the "Software") may only be used 
+	(executed, modified, executed after modifications) if you have
+	purchased a valid license from the authors, typically via Odoo Apps,
+	or if you have received a written agreement from the authors of the
+	Software (see the COPYRIGHT file).
+	
+	You may develop Odoo modules that use the Software as a library 
+	(typically by depending on it, importing it and using its resources),
+	but without copying any source code or material from the Software.
+	You may distribute those modules under the license of your choice,
+	provided that this license is compatible with the terms of the Odoo
+	Proprietary License (For example: LGPL, MIT, or proprietary licenses
+	similar to this one).
+	
+	It is forbidden to publish, distribute, sublicense, or sell copies of
+	the Software or modified copies of the Software.
+	
+	The above copyright notice and this permission notice must be included
+	in all copies or substantial portions of the Software.
+	
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+	OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+	THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+	FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+	DEALINGS IN THE SOFTWARE.
+-->
+
+<odoo>
+
+	<record id="view_server_action_form" model="ir.ui.view">
+	    <field name="name">ir.actions.server.form</field>
+	    <field name="model">ir.actions.server</field>
+	    <field name="inherit_id" ref="base.view_server_action_form"/>
+	    <field name="arch" type="xml">
+	        <xpath expr="//group[@name='action_wrapper']" position="after">
+       			<group name="action_webhook" attrs="{'invisible': [('state', '!=', 'webhook')]}">
+	                <group>
+	                    <field name="webhook_address" widget="url"/>
+	                    <field name="webhook_method"/>
+	                </group>
+	                <group>
+	                    <field name="webhook_timeout"/>
+	                    <field name="webhook_authentication"/>
+	                </group>
+	            </group>
+	        </xpath>
+	        <xpath expr="//page[@name='code']" position="after">
+	        	<page string="Payload" name="webhook_payload" autofocus="autofocus" attrs="{'invisible': [('state', '!=', 'webhook')]}">
+	        		<field name="webhook_payload" widget="ace" options="{'mode': 'python'}" />
+				</page>
+	        	<page string="Fields" name="webhook_fields" attrs="{'invisible': [('state', '!=', 'webhook')]}">
+	        		<p attrs="{'invisible': [('model_id', '!=', False)]}">
+	        			Please set a model before adding fields to the action.
+	        		</p>
+					<field name="webhook_fields" attrs="{'invisible': [('model_id', '=', False)]}">
+						<tree string="Fields">
+							<field name="name"/>
+							<field name="field_description"/>
+							<field name="ttype"/>
+						</tree>
+					</field>
+				</page>
+				<page string="Process" name="webhook_process" autofocus="autofocus" attrs="{'invisible': [('state', '!=', 'webhook')]}">
+	        		<field name="webhook_process" widget="ace" options="{'mode': 'python'}" />
+				</page>
+	        	<page string="Authentication" name="webhook_authentication" attrs="{'invisible': ['|', ('state', '!=', 'webhook'), ('webhook_authentication', '=', 'none')]}">
+					<group>
+						<group>
+							<field name="webhook_token" attrs="{'required': [('webhook_authentication', '=', 'token')], 'invisible': [('webhook_authentication', '!=', 'token')]}" />
+			                <field name="webhook_user" attrs="{'required': ['|', ('webhook_authentication', '=', 'base'), '|', ('webhook_authentication', '=', 'digest'), '&amp;', ('webhook_authentication', '=', 'oauth2'), ('webhook_grant', '=', 'password')], 'invisible': ['&amp;', ('webhook_authentication', '!=', 'base'), '&amp;', ('webhook_authentication', '!=', 'digest'), ('webhook_authentication', '!=', 'oauth2')]}" />
+		                    <field name="webhook_password" password="True" attrs="{'required': ['|', ('webhook_authentication', '=', 'base'), '|', ('webhook_authentication', '=', 'digest'), '&amp;', ('webhook_authentication', '=', 'oauth2'), ('webhook_grant', '=', 'password')], 'invisible': ['&amp;', ('webhook_authentication', '!=', 'base'), '&amp;', ('webhook_authentication', '!=', 'digest'), ('webhook_authentication', '!=', 'oauth2')]}" />
+		                	<field name="webhook_client_key" attrs="{'required': ['|', ('webhook_authentication', '=', 'oauth1'), ('webhook_authentication', '=', 'oauth2')], 'invisible': ['&amp;', ('webhook_authentication', '!=', 'oauth1'), ('webhook_authentication', '!=', 'oauth2')]}" />
+		                	<field name="webhook_client_secret" attrs="{'required': ['|', ('webhook_authentication', '=', 'oauth1'), ('webhook_authentication', '=', 'oauth2')], 'invisible': ['&amp;', ('webhook_authentication', '!=', 'oauth1'), ('webhook_authentication', '!=', 'oauth2')]}" />
+			            </group>
+			            <group>
+		                	<field name="webhook_resource_owner_key" attrs="{'required': [('webhook_authentication', '=', 'oauth1')], 'invisible': [('webhook_authentication', '!=', 'oauth1')]}" />
+		                	<field name="webhook_resource_owner_secret" attrs="{'required': [('webhook_authentication', '=', 'oauth1')], 'invisible': [('webhook_authentication', '!=', 'oauth1')]}" />
+		                	<field name="webhook_token_url" widget="url" attrs="{'required': [('webhook_authentication', '=', 'oauth2')], 'invisible': [('webhook_authentication', '!=', 'oauth2')]}" />
+		                	<field name="webhook_grant" attrs="{'required': [('webhook_authentication', '=', 'oauth2')], 'invisible': [('webhook_authentication', '!=', 'oauth2')]}" />
+		                </group>
+		            </group>
+				</page>
+				<page string="SSL" name="webhook_ssl" attrs="{'invisible': ['|', ('state', '!=', 'webhook'), ('webhook_secure', '=', False)]}">
+					<group>
+						<group>
+							<field name="webhook_secure" invisible="1" />
+							<field name="webhook_verify" />
+						</group>
+						<group>
+							<field name="webhook_path" />
+						</group>
+		            </group>
+				</page>
+				<page string="Help" attrs="{'invisible': [('state', '!=', 'webhook')]}">
+	                <group>
+	                    <div style="margin-top: 4px;">                        
+		                    <h3>Webhooks</h3>
+		                    <p>Webhooks are user-defined HTTP callbacks that can be used to perform push notifications.</p>
+							<p>
+								It is possible to intervene in the process at two points. Once before the request is sent.
+							 	In the tab "Payload" Python code can be written. In addition, fields can be defined, which
+							 	are then automatically appended to the request. In a second step the received response can
+							 	be processed. Therefore Python code can also be written in the tab "Process". This receives
+							 	the response as context. Both options are optinal. The easiest way to add Webhook is that you can simply
+							 	enter a URL in the address field and leave all other settings as default.
+							 </p>
+							 <p>The following variables can be used in the python code:</p>
+                             <ul>
+                             	<li><code>env</code>: Odoo Environment on which the action is triggered</li>
+                             	<li><code>user</code>: User who triggered the action</li>
+                             	<li><code>request</code>: Request send by the action</li>
+                             	<li><code>response</code>: Response received when the request was sent</li>
+                                <li><code>model</code>: Odoo Model of the record on which the action is triggered; is a void recordset</li>
+                                <li><code>record</code>: record on which the action is triggered; may be be void</li>
+                                <li><code>records</code>: recordset of all records on which the action is triggered in multi mode; may be void</li>
+                                <li><code>time</code>, <code>datetime</code>, <code>dateutil</code>, <code>timezone</code>: useful Python libraries</li>
+                                <li><code>date_format</code>, <code>datetime_format</code>: server date and time formats</li>
+                                <li><code>dump(content)</code>: dumps content into a json string and takes care of converting dates and records</li>
+                                <li><code>log(message, level='info')</code>: logging function to record debug information in <code>ir.logging</code> table</li>
+                                <li><code>Warning</code>: Warning Exception to use with <code>raise</code></li>
+                                <li>To extend the playload, assign: <code>content = {...}</code></li>
+                        	</ul>	
+	                    </div>
+	                </group>
+	            </page>
+	        </xpath>
+	    </field>
+	</record>
+        
+</odoo>
