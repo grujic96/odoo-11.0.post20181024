@@ -608,7 +608,7 @@
                                         </li>
                                         <field name="poziv_osoblju" invisible="1"/>
                                         <li attrs="{'invisible': [('poziv_osoblju', '=', False)]}">
-                                            <font color="green">Gost je pozvao osoblje</font>
+                                            <font color="green"><span class="glyphicon glyphicon-phone-alt"></span> Gost je pozvao osoblje</font>
                                         </li>
                                         <field name="do_not_disturb" invisible="1"/>
                                         <li attrs="{'invisible': [('do_not_disturb', '=', False)]}">
