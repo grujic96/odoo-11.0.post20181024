@@ -255,11 +255,12 @@ class HotelRoom(models.Model):
 
     #promena statusa
     hotel_room_status_change_id = fields.One2many('hotel.room.status.change' , 'room_status_change_id')
-    do_not_disturb = fields.Boolean('Do Not disturb')
+    #do_not_disturb = fields.Boolean('Do Not disturb')
+    do_not_disturb = fields.Boolean('Do Not Disturb', default=False)
     sos = fields.Boolean('SOS', default = False)
-    sos_status = fields.Selection([('true', 'Ukljucen'), ('false', 'Iskljucen')], 'Sos Status', default='false')
-    poziv_osoblju = fields.Selection([('true', 'gost je pozvao osoblje'), ('false', '')])
-    gost_status = fields.Selection([('true', 'gost je u sobi'), ('false', 'soba je prazna')])
+    sos_status = fields.Boolean('Sos status', default = False)
+    poziv_osoblju = fields.Boolean('Poziv osoblju', default=False )
+    gost_status = fields.Boolean('Gost', default=False)
     broj_sobe = fields.Integer('Broj Sobe')
 
 
@@ -474,6 +475,7 @@ class HotelRoom(models.Model):
 # print('Checkpoint')
 # time.sleep(7)
 # print('Bye')
+
 
 
 class HotelFolio(models.Model):

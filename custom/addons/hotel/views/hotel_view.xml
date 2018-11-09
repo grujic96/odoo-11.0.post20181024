@@ -298,10 +298,11 @@
                                 <field name="categ_id" select="1" />
                                 <field name="product_manager" select="2" string="Room Manager" />
                                 <field name="capacity" />
-                                <field name="do_not_disturb"/>
-                                <field name="sos"/>
+                                <field name="do_not_disturb" options='{"bg_color": "#4bf442: do_not_disturb == True"}'/>
+                                <field name="sos_status"/>
+                                <field name ="gost_status"/>
+                                <field name ="poziv_osoblju"/>
                                 <field name="uom_id" invisible="1" />
-                                 <field name="sos_status" invisible="1" />
 
                             </group>
                             <newline />
@@ -388,14 +389,14 @@
         <field name="name">hotel.room.tree</field>
         <field name="model">hotel.room</field>
         <field name="arch" type="xml">
-            <tree string="Hotel Room">
+            <tree string="Hotel Room" >
 
                 <field name="name" />
                 <field name="categ_id" />
                 <field name="list_price" string="Room rate" />
                 <field name="status" />
                 <field name="capacity" />
-                <field name="do_not_disturb" />
+                <field name="do_not_disturb" options='{"bg_color": "#4bf442: do_not_disturb == True"}'/>
                 <field name="sos_status" />
 
             </tree>
@@ -518,7 +519,7 @@
                 <field name="name" />
                 <field name="list_price" string="Room rate" />
                 <field name="status" />
-                <field name="do_not_disturb" />
+                <field name="do_not_disturb" options='{"bg_color": "#4bf442: do_not_disturb == True"}'/>
                 <field name="sos_status"/>
                 <field name="poziv_osoblju"/>
                 <field name="gost_status" string="Gost"/>
@@ -532,7 +533,7 @@
         <field name="name">hotel.room_status.kanban</field>
         <field name="model">hotel.room</field>
         <field name="arch" type="xml">
-            <kanban default_group_by="status">
+            <kanban default_group_by="status" color="red">
                 <field name="name" />
                 <field name="status" />
                 <field name="color" />
@@ -567,7 +568,7 @@
                             <div class="oe_kanban_details" style='margin-top: -5px;'>
                                 <div class="oe_kanban_content">
                                     <div class="oe_kanban_project_list">
-                                        <H3>
+                                     <!--   <H3>
                                             <a type="open">
                                                 <img
                                                     t-att-src="kanban_image('hotel.room', 'image_medium', record.id.value)"
@@ -579,29 +580,43 @@
                                                 </t>
                                                 <field name="name" />
                                             </a>
-                                        </H3>
+                                        </H3> -->
+                                        <H1>
+                                            <field name="name" />
+                                        </H1>
                                     </div>
                                     <div name="tags" />
                                     <ul>
-                                        <li>
+                                        <field name="status" invisible="1"/>
+                                        <li attrs="{'invisible': [('status', '=', 'occupied')]}">
+                                            <H2>
                                             Status:
-                                            <field name="status"></field>
+                                                <font color="green">Available</font>
+                                                
+                                            </H2>
                                         </li>
-                                        <li>
-                                            Broj sobe:
-                                            <field name="broj_sobe"></field>
+                                        <li attrs="{'invisible': [('status', '=', 'available')]}">
+                                            <H2>
+                                            Status:
+                                                <font color="red">Occupied</font>
+
+                                            </H2>
                                         </li>
-                                        <li>
-                                            Osoblje:
-                                            <field name="poziv_osoblju"></field>
+                                        <field name="sos_status" invisible="1"/>
+                                        <li attrs="{'invisible': [('sos_status', '=', False)]}">
+                                            <H3><font color="red">SOS!!!</font></H3>
                                         </li>
-                                        <li>
-                                            Do not disturb:
-                                            <field name="do_not_disturb" />
+                                        <field name="poziv_osoblju" invisible="1"/>
+                                        <li attrs="{'invisible': [('poziv_osoblju', '=', False)]}">
+                                            <font color="green">Gost je pozvao osoblje</font>
                                         </li>
-                                        <li>
-                                            Gost:
-                                            <field name="gost_status" />
+                                        <field name="do_not_disturb" invisible="1"/>
+                                        <li attrs="{'invisible': [('do_not_disturb', '=', False)]}">
+                                            <font color="green">Do not disturb Ukljucen</font>
+                                        </li>
+                                        <field name="gost_status" invisible="1"/>
+                                        <li attrs="{'invisible': [('gost_status', '=', False)]}">
+                                            <font color="green">Gost je u sobi</font>
                                         </li>
                                     </ul>
                                 </div>
@@ -635,14 +650,8 @@
         <field name="view_mode">kanban,tree,form</field>
     </record>
 
-    <record model="ir.actions.server" id="action_hotel_room_refresh_form">
-        <field name="name">refresh.hotel.room_status</field>
-        <field name="model_id" ref="model_hotel_room"/>
-        <field name="code">model.status_soba()
-        </field>
 
 
-    </record>
 
      <!-- Tree view of hotel room_status_change_history  -->
 
@@ -674,17 +683,15 @@
         <field name="view_mode">kanban,tree,form</field>
     </record>
 
-    <menuitem id="menu_open_hotel_room_status_change_history_form" name="Room_Status_Change_History"
+    <menuitem id="menu_open_hotel_room_status_change_history_form" name="Room Status Change History"
         action="action_hotel_room_status_change_history_form" sequence="7" parent="hotel.menu_hotel_room" />
 
 
 
 
 
-    <menuitem id="menu_open_hotel_room_status_form" name="Room_Status"
+    <menuitem id="menu_open_hotel_room_status_form" name="Room Status"
         action="action_hotel_room_status_form" sequence="6" parent="hotel.menu_hotel_room" />
-    <menuitem id="menu_open_hotel_room_refresh_form" name="Refresh"
-        action="action_hotel_room_refresh_form" sequence="8" parent="hotel.menu_hotel_room" />
 
 
 

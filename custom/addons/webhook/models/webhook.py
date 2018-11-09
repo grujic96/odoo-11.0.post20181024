@@ -229,8 +229,6 @@ class Webhook(models.Model):
     def run_github_push_task(self, request):
 
         _logger.warning('stigo')
-
-
         headers = request.httprequest.headers.get("X-GetEvent")
 
         data = json.loads(headers)
@@ -238,39 +236,41 @@ class Webhook(models.Model):
         data_record = data['records']
         data_record = data_record[1:-1]
         data_record = json.loads(data_record)
-        hotel_room = self.env['hotel.room'].search([("id", '=', data_record['id'])])
+        hotel_room = self.env['hotel.room'].search([("broj_sobe", '=', data_record['broj_sobe'])])
         print(data_record['do_not_disturb'])
-
-        if(hotel_room.do_not_disturb!= data_record['do_not_disturb']):
-            if hotel_room.do_not_disturb == True:
+        print(data_record['gost_status'])
+        print(data_record['poziv_osoblju'])
+        data_recordd = [('true', 'true'), (False, 'false')]
+        if hotel_room.do_not_disturb != data_record['do_not_disturb']:
+            if hotel_room.do_not_disturb:
                 hotel_room.do_not_disturb_change("Iskljucen")
-                hotel_room.do_not_disturb = data_record['do_not_disturb']
+                hotel_room.do_not_disturb = False
             else:
                 hotel_room.do_not_disturb_change("Ukljucen")
-                hotel_room.do_not_disturb = data_record['do_not_disturb']
+                hotel_room.do_not_disturb = True
 
-        if (hotel_room.sos_status != data_record['sos_status']):
-            if hotel_room.sos_status == 'true':
+        if hotel_room.sos_status != data_record['sos_status']:
+            if hotel_room.sos_status == True:
                 hotel_room.sos_status_change("Iskljucen")
                 hotel_room.sos_status = data_record['sos_status']
             else:
                 hotel_room.sos_status_change("Ukljucen")
-                hotel_room.sos_status = data_record['sos_status']
+                hotel_room.sos_status = True
 
-        if (hotel_room.gost_status != data_record['gost_status']):
-            if hotel_room.gost_status == 'true':
+        if hotel_room.gost_status != data_record['gost_status']:
+            if hotel_room.gost_status == True:
                 hotel_room.gost_status_change("Iskljucen")
-                hotel_room.gost_status = data_record['gost_status']
+                hotel_room.gost_status =False
             else:
                 hotel_room.gost_status_change("Ukljucen")
-                hotel_room.gost_status = data_record['gost_status']
-        if (hotel_room.poziv_osoblju != data_record['poziv_osoblju']):
-            if hotel_room.poziv_osoblju == 'true':
+                hotel_room.gost_status = True
+        if hotel_room.poziv_osoblju != data_record['poziv_osoblju']:
+            if hotel_room.poziv_osoblju == True:
                 hotel_room.poziv_osoblju_change("Iskljucen")
-                hotel_room.poziv_osoblju = data_record['poziv_osoblju']
+                hotel_room.poziv_osoblju = False
             else:
                 hotel_room.poziv_osoblju_change("Ukljucen")
-                hotel_room.poziv_osoblju_change = data_record['poziv_osoblju']
+                hotel_room.poziv_osoblju = True
 
 
 
