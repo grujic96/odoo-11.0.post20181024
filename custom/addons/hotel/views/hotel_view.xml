@@ -519,10 +519,11 @@
                 <field name="name" />
                 <field name="list_price" string="Room rate" />
                 <field name="status" />
-                <field name="do_not_disturb" options='{"bg_color": "#4bf442: do_not_disturb == True"}'/>
-                <field name="sos_status"/>
-                <field name="poziv_osoblju"/>
-                <field name="gost_status" string="Gost"/>
+                <field name="do_not_disturb" options='{"bg_color": "#2b8745: do_not_disturb == True"}'/>
+                <field name="sos_status" options='{"bg_color": "#2b8745: sos_status == True"}' align="center" />
+                <field name="poziv_osoblju" options='{"bg_color": "#2b8745: poziv_osoblju == True"}'/>
+                <field name="gost_status" string="Gost" options='{"bg_color": "#2b8745: gost_status == True"}'/>
+                <field name="floor_id" invisible="True"/>
             </tree>
 
         </field>
@@ -568,7 +569,7 @@
                             <div class="oe_kanban_details" style='margin-top: -5px;'>
                                 <div class="oe_kanban_content">
                                     <div class="oe_kanban_project_list">
-                                     <!--   <H3>
+                                        <H3>
                                             <a type="open">
                                                 <img
                                                     t-att-src="kanban_image('hotel.room', 'image_medium', record.id.value)"
@@ -580,44 +581,55 @@
                                                 </t>
                                                 <field name="name" />
                                             </a>
-                                        </H3> -->
-                                        <H1>
-                                            <field name="name" />
-                                        </H1>
+                                        </H3>
                                     </div>
-                                    <div name="tags" />
+                                    <div name="tags" class="row"/>
                                     <ul>
                                         <field name="status" invisible="1"/>
                                         <li attrs="{'invisible': [('status', '=', 'occupied')]}">
-                                            <H2>
-                                            Status:
+                                            <H3>
                                                 <font color="green">Available</font>
                                                 
-                                            </H2>
+                                            </H3>
                                         </li>
                                         <li attrs="{'invisible': [('status', '=', 'available')]}">
-                                            <H2>
-                                            Status:
+                                            <H3>
                                                 <font color="red">Occupied</font>
 
-                                            </H2>
+                                            </H3>
                                         </li>
+                                        <div class="row">
                                         <field name="sos_status" invisible="1"/>
-                                        <li attrs="{'invisible': [('sos_status', '=', False)]}">
-                                            <H3><font color="red">SOS!!!</font></H3>
-                                        </li>
+                                        <div class="col-sm-1" attrs="{'invisible': [('sos_status', '=', False)]}" align="center">
+                                            <H3><font color="ad0a15">  <span class="glyphicon glyphicon-alert"></span></font></H3>
+                                        </div>
+                                        <div class="col-sm-1" attrs="{'invisible': [('sos_status', '=', True)]}" align="center">
+                                            <H3><font color="black">  <span class="glyphicon glyphicon-alert"></span></font></H3>
+                                        </div>
                                         <field name="poziv_osoblju" invisible="1"/>
-                                        <li attrs="{'invisible': [('poziv_osoblju', '=', False)]}">
-                                            <font color="green"><span class="glyphicon glyphicon-phone-alt"></span> Gost je pozvao osoblje</font>
-                                        </li>
+                                        <div class="col-sm-1" attrs="{'invisible': [('poziv_osoblju', '=', False)]}" align="center">
+                                            <H3><font color="#037c09"><span class="glyphicon glyphicon-phone-alt"></span></font></H3>
+                                        </div>
+                                        <div class="col-sm-1" attrs="{'invisible': [('poziv_osoblju', '=', True)]}" align="center">
+                                            <H3><font color="black"><span class="glyphicon glyphicon-phone-alt"></span></font></H3>
+                                        </div>
                                         <field name="do_not_disturb" invisible="1"/>
-                                        <li attrs="{'invisible': [('do_not_disturb', '=', False)]}">
-                                            <font color="green">Do not disturb Ukljucen</font>
-                                        </li>
+                                        <div class="col-sm-1" attrs="{'invisible': [('do_not_disturb', '=', False)]}" align="center">
+
+                                            <H3><font color="#037c09"><span class="glyphicon glyphicon-minus-sign"></span></font></H3>
+                                        </div>
+                                        <div class="col-sm-1" attrs="{'invisible': [('do_not_disturb', '=', True)]}" align="center">
+
+                                            <H3><font color="black"><span class="glyphicon glyphicon-minus-sign"></span></font></H3>
+                                        </div>
                                         <field name="gost_status" invisible="1"/>
-                                        <li attrs="{'invisible': [('gost_status', '=', False)]}">
-                                            <font color="green">Gost je u sobi</font>
-                                        </li>
+                                        <div class="col-sm-1" attrs="{'invisible': [('gost_status', '=', False)]}" align="center">
+                                            <H3><font color="#037c09"><span class="glyphicon glyphicon-user"></span></font></H3>
+                                        </div>
+                                            <div class="col-sm-1" attrs="{'invisible': [('gost_status', '=', True)]}" align="center">
+                                                <H3><font color="black"><span class="glyphicon glyphicon-user"></span></font></H3>
+                                        </div>
+                                        </div>
                                     </ul>
                                 </div>
                                 <div class="oe_kanban_bottom_right">

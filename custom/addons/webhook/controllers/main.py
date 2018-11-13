@@ -14,7 +14,7 @@ from odoo.tools.translate import _
 class WebhookController(http.Controller):
 
     @http.route(['/webhook/<webhook_name>'], type='http',
-                auth='none', method=['POST'] , csrf=False)
+                auth='none', method=['POST'], csrf=False)
     def webhook(self, webhook_name, **post):
         '''
         :params string webhook_name: Name of webhook to use

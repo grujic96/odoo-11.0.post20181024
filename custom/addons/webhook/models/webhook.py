@@ -230,7 +230,7 @@ class Webhook(models.Model):
 
         _logger.warning('stigo')
         headers = request.httprequest.headers.get("X-GetEvent")
-
+        # TODO: Probaj bez json.loads
         data = json.loads(headers)
         print(data)
         data_record = data['records']

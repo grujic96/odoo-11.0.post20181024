@@ -22,7 +22,6 @@
         'views/webhook_views.xml',
     ],
     'demo': [
-        'demo/webhook_demo.xml',
     ],
     'installable': True,
     'auto_install': False,
