@@ -225,7 +225,12 @@ class HotelRoomStatusChangeHistory(models.Model):
     time_of_change = fields.Datetime('Vreme Promene')
     broj_sobe = fields.Integer("Broj sobe")
     #ime_statusa = fields.Selection([('sos_status', 'Sos_status'), ('do_not_disturb', 'Do not disturb')], 'Promenjeni status')
+
+
     ime_statusa = fields.Char('Promenjeni status')
+
+
+
 
 class HotelRoom(models.Model):
 

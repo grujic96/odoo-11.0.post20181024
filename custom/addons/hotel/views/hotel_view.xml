@@ -273,28 +273,70 @@
         <field name="arch" type="xml">
             <form string="Hotel Room">
                 <sheet>
-                    <field name="image_medium" widget="image" class="oe_avatar" />
-                    <div class="oe_title">
-                        <label for="name" string="Name" />
+                    <field name="image" widget="image"  class="oe_avatar"  options="{&quot;preview_image&quot;: &quot;image_medium&quot;, &quot;size&quot;: [150, 150]}"/>
+                     <div class="oe_title">
                         <h1>
-                            <field name="name" />
+                            <field name="name" default_focus="1" placeholder="Name" />
                         </h1>
-                         <label for="broj_sobe" string="Broj Sobe" />
-                        <h1>
-                            <field name="broj_sobe" />
-                        </h1>
-                        <label for="status" string="Status" />
-                        <h2>
-                            <field name="status" readonly="1" />
-                        </h2>
-                        <h2>
-                            <field name="isroom" />
-                        </h2>
-                    </div>
+                     </div>
+                         <group>
+                         <group>
+                             <div>
+                                 <h1>
+                                     Broj Sobe: <field name="broj_sobe"/>
+                                 </h1>
+                                 <h2>
+                                     Status Sobe: <field name="status" />
+                                 </h2>
+                                 <h2>
+                                     <field name="isroom" invisible="1"/>
+                                 </h2>
+                                 <h2>
+                                     Capacity: <field name="capacity"/>
+                                 </h2>
+                             </div>
+
+                         </group>
+                         <group>
+                              <group colspan="4" col="1">
+
+                                        <field name="sos_status" invisible="1"/>
+                                        <div attrs="{'invisible': [('sos_status', '=', False)]}" align="left">
+                                            <H3>SOS: <font color="ad0a15">  <span class="glyphicon glyphicon-alert"></span></font></H3>
+                                        </div>
+                                        <div attrs="{'invisible': [('sos_status', '=', True)]}" align="left">
+                                            <H3>SOS: <font color="black">  <span class="glyphicon glyphicon-alert"></span></font></H3>
+                                        </div>
+                                        <field name="poziv_osoblju" invisible="1"/>
+                                        <div  attrs="{'invisible': [('poziv_osoblju', '=', False)]}" align="left">
+                                            <H3>Poziv Sobarici: <font color="#037c09"><span class="glyphicon glyphicon-phone-alt"></span></font></H3>
+                                        </div>
+                                        <div  attrs="{'invisible': [('poziv_osoblju', '=', True)]}" align="left">
+                                            <H3>Poziv Sobarici: <font color="black"><span class="glyphicon glyphicon-phone-alt"></span></font></H3>
+                                        </div>
+                                        <field name="do_not_disturb" invisible="1"/>
+                                        <div  attrs="{'invisible': [('do_not_disturb', '=', False)]}" align="left">
+
+                                            <H3>Do not disturb: <font color="#037c09"><span class="glyphicon glyphicon-minus-sign"></span></font></H3>
+                                        </div>
+                                        <div  attrs="{'invisible': [('do_not_disturb', '=', True)]}" align="left">
+
+                                            <H3>Do not disturb: <font color="black"><span class="glyphicon glyphicon-minus-sign"></span></font></H3>
+                                        </div>
+                                        <field name="gost_status" invisible="1"/>
+                                        <div  attrs="{'invisible': [('gost_status', '=', False)]}" align="left">
+                                            <H3>Gost: <font color="#037c09"><span class="glyphicon glyphicon-user"></span></font></H3>
+                                        </div>
+                                        <div id="goststatustrue" attrs="{'invisible': [('gost_status', '=', True)]}" align="left">
+                                            <H3>Gost: <font color="black"><span id="asdf" class="glyphicon glyphicon-user" ></span></font></H3>
+                                        </div>
+                              </group>
+                         </group>
+                      </group>
+
                     <notebook>
                         <page name="information_hotel_room" string="Information">
                             <group colspan="4" col="4">
-                                <field name="image_medium" ></field>
                                 <field name="floor_id" string="Floor" />
                                 <field name="categ_id" select="1" />
                                 <field name="product_manager" select="2" string="Room Manager" />
@@ -545,7 +587,7 @@
                 <field name="floor_id"/>
                 <templates>
                     <t t-name="kanban-box">
-                        <div
+                        <div id="sampleDiv"
                             t-attf-class="oe_kanban_color_#{kanban_getcolor(record.color.raw_value)} oe_kanban_card oe_kanban_global_click">
                             <div class="o_dropdown_kanban dropdown" groups="base.group_user">
                                 <a class="dropdown-toggle btn" data-toggle="dropdown" href="#">
@@ -575,7 +617,7 @@
                                                 <field name="name"/>
                                                 <img
                                                     t-att-src="kanban_image('hotel.room', 'image_medium', record.id.value)"
-                                                    style="height:120px;width:120px" class="oe_avatar oe_kanban_avatar_smallbox" align="right"/>
+                                                    style="height:130px;width:130px"  align="right"/>
                                                 <t t-if="record.code.raw_value" style="margin-right: 10px">
                                                     [
                                                     <field name="code" />
@@ -642,11 +684,14 @@
                                         class="oe_kanban_status oe_kanban_status_red ">
                                     </a>
                                 </div>
+
                             </div>
+
                             <div class="oe_clear"></div>
                         </div>
                     </t>
                 </templates>
+
             </kanban>
         </field>
     </record>
