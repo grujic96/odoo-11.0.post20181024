@@ -2,8 +2,10 @@
 import time
 import logging
 import datetime
-import threading
-from threading import Thread
+import binascii
+import ast
+import socket
+from odoo.http import request
 from odoo.exceptions import UserError, ValidationError
 from odoo.osv import expression
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT
@@ -231,12 +233,293 @@ class HotelRoomStatusChangeHistory(models.Model):
 
 
 
+class HotelRoomCard(models.Model):
+    _name = 'hotel.room.card'
+    _description = 'kartica'
+
+
+    sobe = fields.Many2many('hotel.room', store=True)
+    broj_kartice = fields.Char('Broj Kartice')
+    lokacija_kartice = fields.Selection([('gost', 'Gost'), ('sobarica', 'Sobarica'), ('recepcionar','Recepcionar')])
+
+    sobe_lista = fields.Char(store=True)
+    provera = fields.Boolean(default=True)
+
+
+
+
+    def get_card_number(self):
+
+            #menja se hidraw file usba
+            fp = open('/dev/hidraw2', 'rb')
+            i= 1
+            while i>0:
+                buffer = fp.read(16)
+                print(str(buffer))
+
+                print(str(buffer.hex()))
+                print(str(buffer.hex()[1]))
+
+                self.broj_kartice = str(buffer[0]-48) + str(buffer[1]-48)+ str(buffer[2]-48)+ str(buffer[3]-48) + str(buffer[4]-48)
+                i=0
+
+    @staticmethod
+    def dtohex(self,ads):
+        asd = hex(ads).split('x')[-1]
+        return asd
+
+
+
+
+    def chksum(self, dsa):
+        a1 = bytearray(dsa)
+        a3 = a1[3]
+        for i in range(4, len(a1)):
+            a3 = a3 ^ a1[i]
+        a2 = bytes(a1)
+
+        a3 = int(a3) & 127
+        a4 = str(a3)
+        if len(str(a3)) == 1:
+            a4 = '0' + str(a3)
+        a4 = int(a4)
+        a4 = hex(a4)
+        a4 = str(a4)
+        a4 = a4[2:4]
+        print('a4 ====' + a4)
+        return a4
+
+    # @api.onchange('sobe')
+    # def onchangee(self):
+    #     print(self.sobe_lista)
+    #     print(self.broj_kartice)
+    #     print(self.sobe)
+    def open_wizard_delete(self, ids, context=None):
+        # context = {'search_default_internal_loc': 1, 'search_default_locationgroup':1}
+        res_id = self
+        view_id = self.env.ref('hotel.view_hotel_room_tree').id
+        ## first delete previous data
+        #self.env['stock.location.ptemplate'].search([('custom_template_id', '=', res_id)]).unlink()
+        ## then create a new data - by referencing computed field
+        #sbl = self.env['product.template'].search([('id', '=', res_id)]).stock_location
+        #mro_context = {
+        #    'mro_id': self.id,
+        #}
+        context = {'id_kartice':self.id}
+        dodaj = {'delete': False}
+        context.update(dodaj)
+
+        dodaj = {'add': True}
+        context.update(dodaj)
+
+        print(self)
+        rec = self.env['hotel.room'].search([])
+        print(self.sobe)
+        print(rec)
+        res_id = self.sobe
+        print(res_id)
+        print(context)
+
+        return {
+            'name': _('Dodaj sobu'),
+            'type': 'ir.actions.act_window',
+            'view_mode': 'tree',
+            'res_model': 'hotel.room',
+            'view_id': view_id,
+            'target': 'new',
+            'context': context,
+            'domain':[('id','in',res_id.ids)]
+
+        }
+
+    def open_wizard(self, ids, context=None):
+        # context = {'search_default_internal_loc': 1, 'search_default_locationgroup':1}
+        res_id = self
+        view_id = self.env.ref('hotel.view_hotel_room_tree').id
+        ## first delete previous data
+        #self.env['stock.location.ptemplate'].search([('custom_template_id', '=', res_id)]).unlink()
+        ## then create a new data - by referencing computed field
+        #sbl = self.env['product.template'].search([('id', '=', res_id)]).stock_location
+        #mro_context = {
+        #    'mro_id': self.id,
+        #}
+        context = {'id_kartice':self.id}
+        dodaj = {'delete': True}
+        context.update(dodaj)
+
+        dodaj = {'add':False}
+        context.update(dodaj)
+        print(self)
+        rec = self.env['hotel.room'].search([])
+        print(self.sobe)
+        print(rec)
+        res_id = rec - self.sobe
+        print(res_id)
+        print(context)
+
+        return {
+            'name': _('Dodaj sobu'),
+            'type': 'ir.actions.act_window',
+            'view_mode': 'tree',
+            'res_model': 'hotel.room',
+            'view_id': view_id,
+            'target': 'new',
+            'context': context,
+            'domain':[('id','in',res_id.ids)]
+
+        }
+
+
+
+
+    def broj_kartice_usb(self):
+        fp = open('/dev/hidraw2', 'rb')
+        i = 1
+        while i > 0:
+            buffer = fp.read(16)
+            print(str(buffer))
+            print(hex(buffer[0]))
+            i = 0
+            return buffer
+
+    def programiranje_kartic(self):
+        buffer = self.broj_kartice_usb()
+        print('nastavi')
+
+        b0 = hex(buffer[0])
+        b0 = b0[2:4]
+        b1 = hex(buffer[1])
+        b1 = b1[2:4]
+        b2 = hex(buffer[2])
+        b2 = b2[2:4]
+        b3 = hex(buffer[3])
+        b3 = b3[2:4]
+        b4 = hex(buffer[4])
+        b4 = b4[2:4]
+        #ToDo dodaj adresu sobe i lokaciju kartice dinamicki
+
+        #ToDo dodaj adresu sobe i lokaciju kartice dinamicki
+
+        dsa = binascii.unhexlify('DDDDDD01010165000001')
+        dsa += binascii.unhexlify(b0)
+        dsa += binascii.unhexlify(b1)
+        dsa += binascii.unhexlify(b2)
+        dsa += binascii.unhexlify(b3)
+        dsa += binascii.unhexlify(b4)
+        dsa += binascii.unhexlify('0000000000000000000000000000000000000000000000000000000000000000')
+        print('stigo1')
+        dsa += binascii.unhexlify(self.chksum(dsa))
+        print('stigo2')
+        dsa += binascii.unhexlify('BB')
+
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        print('stigo')
+        #na serverskoj strani salje se na .171
+
+        server_address = ('192.168.1.116', 80)
+        sent = sock.sendto(dsa, server_address)
+        print('proso')
+
+        # serverside
+        # sad = 1
+        # while sad > 0:
+        #     data, address = sock.recvfrom(512)
+        #     print('primljen paket ' + str(data))
+        #     print(address)
+        #
+        #     if (len(data) == 7):
+        #         self.provera_kartice()
+        #         sad = 0
+
+    def provera_kartice(self):
+        dsa = binascii.unhexlify('DDDDDD0102')
+        dsa += binascii.unhexlify('01')
+        dsa += binascii.unhexlify('0200')
+        dsa += binascii.unhexlify('01')
+
+        #Todo dodaj broj sobe i lokaciju kartice dinamicki
+        asd = bytes(dsa)
+        dsa += binascii.unhexlify('0000000000000000000000000000000000000000000000000000000000000000000000000000')
+
+
+        dsa += binascii.unhexlify(self.chksum(dsa))
+        dsa += binascii.unhexlify('BB')
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+        # na serverskoj strani salje se na .171
+        server_address = ('192.168.1.116', 80)
+        sent = sock.sendto(dsa, server_address)
+
+
+    def brisanje_kartice(self):
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sock.bind(('0.0.0.0', 80))
+        while True:
+            buffer = self.broj_kartice_usb()
+            data, address = sock.recvfrom(512)
+            print('primljen paket ' + str(data))
+            print(address)
+            print('duzina' + str(len(data)))
+            if (len(data) == 7):
+                dsa = binascii.unhexlify('DDDDDD0101')
+                dsa += binascii.unhexlify(self.sobe)    #==============================================>                  Todo ovde treba da vrati samo jedan broj sobe koja je izbacena
+                dsa += binascii.unhexlify('650000')
+                dsa += binascii.unhexlify(self.lokacija_kartice)
+                asd = bytes(dsa)
+                dsa += binascii.unhexlify('FFFFFFFFFF')
+                dsa += binascii.unhexlify('0000000000000000000000000000000000000000000000000000000000000000')
+                dsa += binascii.unhexlify(self.chksum(dsa))
+                dsa += binascii.unhexlify('BB')
+                print(dsa)
+
+                # na serverskoj strani salje se na .171
+                server_address = ('192.168.1.116', 80)
+                sent = sock.sendto(dsa, server_address)
+
+    def odazivanje(self):
+        dsa = binascii.unhexlify('DDDDDD0100')
+        asd = bytes(dsa)
+
+        time_now = datetime.datetime.now()
+        timee = time_now.timetuple()
+        dsa += bytes([timee.tm_mday]) + bytes([timee.tm_mon]) + bytes([18]) + bytes([timee.tm_hour]) + bytes(
+            [timee.tm_min]) + bytes([20])
+
+        dsa += binascii.unhexlify('000000000000000000000000000000000000000000000000000000000000000000000000')
+        dsa += binascii.unhexlify(self.chksum(dsa))
+        dsa += binascii.unhexlify('BB')
+
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        server_address = ('192.168.1.171', 80)
+        sent = sock.sendto(dsa, server_address)
+
+    def find_card_by_card_number(self):
+        cards = self.env['hotel.room.card'].search([])
+        print('usosss')
+        context =  None
+        view_id = self.env.ref('hotel.view_hotel_room_card_tree').id
+        res_id = self
+       # for rec in cards:
+            #if rec.broj_kartice == '0000000':
+               # res_id = rec
+
+        return {
+            'name': _('Dodaj sobu'),
+            'type': 'ir.actions.act_window',
+            'view_mode': 'tree',
+            'res_model': 'hotel.room',
+            'view_id': view_id,
+            'target': 'new',
+            'context': context,
+            'domain': [('id', 'in', res_id.ids)]
+
+        }
+
 
 class HotelRoom(models.Model):
 
     _name = 'hotel.room'
     _description = 'Hotel Room'
-
 
     product_id = fields.Many2one('product.product', 'Product_id',
                                  required=True, delegate=True,
@@ -260,13 +543,17 @@ class HotelRoom(models.Model):
 
     #promena statusa
     hotel_room_status_change_id = fields.One2many('hotel.room.status.change' , 'room_status_change_id')
-    #do_not_disturb = fields.Boolean('Do Not disturb')
     do_not_disturb = fields.Boolean('Do Not Disturb', default=False)
     sos = fields.Boolean('SOS', default = False)
     sos_status = fields.Boolean('Sos status', default = False)
     poziv_osoblju = fields.Boolean('Poziv osoblju', default=False )
     gost_status = fields.Boolean('Gost', default=False)
     broj_sobe = fields.Integer('Broj Sobe')
+    kartice = fields.Many2many('hotel.room.card')
+
+
+
+
 
 
     def id_by_broj_sobe(self):
@@ -317,6 +604,57 @@ class HotelRoom(models.Model):
     #         })
 
 
+    @api.one
+    def add_many2many_relation(self):
+
+        _logger.warning('================_context %s', self._context)
+        active_id = self._context.get('id_kartice')
+        print('activeid')
+        print(active_id)
+        # id kartice iz url parametra
+
+
+        _logger.warning('-------------------------------active_id%s', active_id)
+        print(self.id)
+        _logger.warning('================active_id %s', active_id)
+
+        asd = self.env['hotel.room.card'].browse(active_id)
+
+        # _logger.warning('-------------------------------asd%s', asd)
+        # for rec in self:
+        asd = self.env['hotel.room.card'].browse(active_id)
+        print(asd.broj_kartice)
+
+        #SALJE PAKET ZA PROGRAMIRANJE GATEWAY-u
+        self.programiranje_kartice(active_id,self.id)
+
+        #UPISUJE RELACIJU IZMEDJU SOBE I KARTICE U BAZI
+        self.write({'kartice': [(4, active_id, 0)]})
+
+    @api.one
+    def delete_record(self):
+        active_id = self._context.get('id_kartice')
+        print('activeid')
+        print(active_id)
+        # id kartice iz url parametra
+        # id = request.__dict__
+        # print(id)
+        # id = id.get('params')
+        # id = id.get('args')
+        # id = str(id)
+        # id = id[6:]
+        # id = id[:-1]
+        # id = ast.literal_eval(id)
+        # id = id.get('params')
+        # id = id.get('id')
+        # print(id)
+        print(self.id)
+
+        asd = self.env['hotel.room.card'].browse(active_id)
+        self.brisanje_kartice(active_id,self.id)
+
+        self.write({'kartice': [(3,active_id,0)]})
+
     @api.multi
     def status_soba(self):
         #self.env['bus.bus'].sendone('auto_refresh', self._name)
@@ -324,10 +662,36 @@ class HotelRoom(models.Model):
         i = 0
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.bind(('0.0.0.0', 80))
+        paket_za_slanje = self.paket_za_odazivanje()
         while True:
             data, address = sock.recvfrom(512)
+
+
             rooms = self.env['hotel.room'].search([])
             print(data)
+            if len(data) == 7:
+
+                #odazivanje
+                if len(paket_za_slanje1) == 49:
+                    server_address = ('192.168.1.171', 80)
+                    sent = sock.sendto(paket_za_slanje1, server_address)
+                    paket_za_slanje1 = 0
+                else:
+                    server_address = ('192.168.1.171', 80)
+                    sent = sock.sendto(paket_za_slanje, server_address)
+
+
+            #proverava da li mu je stigo paket sa naredbom od pc-ja
+            if len(data)==49:
+                if(data[4] == 1):
+                    paket_za_slanje1 = data
+
+
+                elif(data[4] == 2):
+
+                    paket_za_slanje1 = data
+            # Todo dodaj proveru kad primi bytearray za proveru kartice
+            #if len(data)== 12
 
             if data[3] == 241:
                 data[2:]
@@ -377,8 +741,153 @@ class HotelRoom(models.Model):
                             room.gost_status = 'false'
 
             i += 1
+
+
            # time.sleep(5)
 
+    def chksum(self, dsa):
+        a1 = bytearray(dsa)
+        a3 = a1[3]
+        for i in range(4, len(a1)):
+            a3 = a3 ^ a1[i]
+        a2 = bytes(a1)
+
+        a3 = int(a3) & 127
+        a4 = str(a3)
+        if len(str(a3)) == 1:
+            a4 = '0' + str(a3)
+        a4 = int(a4)
+        a4 = hex(a4)
+        a4 = str(a4)
+        a4 = a4[2:4]
+        if len(str(a4))== 1:
+            a4 = '0' + str(a4)
+        return a4
+
+    def programiranje_kartice(self,id_kartice,id_sobe):
+
+        #buffer = self.broj_kartice_usb()
+        buffer = self.env['hotel.room.card'].browse(id_kartice)
+        buffer = buffer.broj_kartice
+        buffer = str(buffer)
+        print('nastavi')
+
+        b0 = str(30 + int(buffer[0]))
+        b1 = str(30 + int(buffer[1]))
+        b2 = str(30 + int(buffer[2]))
+        b3 = str(30 + int(buffer[3]))
+        b4 = str(30 + int(buffer[4]))
+
+        id_kartice = str(id_kartice)
+        id_kartice = int(id_kartice)
+        id_kartice = hex(id_kartice)
+        id_kartice = str(id_kartice)
+        id_kartice = id_kartice[2:4]
+        #
+        id_sobe = str(id_sobe)
+
+        if (len(id_sobe)) == 1:
+            id_sobe = '0' + id_sobe
+
+        if(len(id_kartice))==1:
+            id_kartice = '0' + id_kartice
+
+        dsa = binascii.unhexlify('DDDDDD0101')
+        print(str(id_sobe))
+
+        dsa += binascii.unhexlify(id_sobe)
+        dsa += binascii.unhexlify('650000')
+        print(id_kartice)
+        #dsa += binascii.unhexlify(id_kartice)
+        dsa += binascii.unhexlify('01')
+        dsa += binascii.unhexlify(b0)
+        dsa += binascii.unhexlify(b1)
+        dsa += binascii.unhexlify(b2)
+        dsa += binascii.unhexlify(b3)
+        dsa += binascii.unhexlify(b4)
+        dsa += binascii.unhexlify('0000000000000000000000000000000000000000000000000000000000000000')
+        dsa += binascii.unhexlify(self.chksum(dsa))
+        print('stigo2')
+        dsa += binascii.unhexlify('BB')
+
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        print('stigo')
+        print(dsa)
+        print(len(dsa))
+        #na serverskoj strani salje se na .171
+
+        server_address = ('192.168.1.116', 80)
+        sent = sock.sendto(dsa, server_address)
+        print('proso')
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+        sock.bind(('0.0.0.0', 80))
+        data, address = sock.recvfrom(512)
+        if data[0] == 1:
+            print('proso uspesno')
+        else:
+            print('neuspesno')
+        sock.close()
+
+    def brisanje_kartice(self,id_kartice,id_sobe):
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        id_kartice = str(id_kartice)
+        id_kartice = int(id_kartice)
+        id_kartice = hex(id_kartice)
+        id_kartice = str(id_kartice)
+        id_kartice = id_kartice[2:4]
+        id_sobe = str(id_sobe)
+
+        if (len(id_sobe)) == 1:
+            id_sobe = '0' + id_sobe
+
+        if (len(id_kartice)) == 1:
+            id_kartice = '0' + id_kartice
+        dsa = binascii.unhexlify('DDDDDD0101')
+        dsa += binascii.unhexlify(id_sobe)    #==============================================>                  Todo ovde treba da vrati samo jedan broj sobe koja je izbacena
+        dsa += binascii.unhexlify('650000')
+        dsa += binascii.unhexlify(id_kartice)
+        #dsa += binascii.unhexlify('01')
+        asd = bytes(dsa)
+        dsa += binascii.unhexlify('ff')
+        dsa += binascii.unhexlify('ff')
+        dsa += binascii.unhexlify('ff')
+        dsa += binascii.unhexlify('ff')
+        dsa += binascii.unhexlify('ff')
+
+        dsa += binascii.unhexlify('0000000000000000000000000000000000000000000000000000000000000000')
+        dsa += binascii.unhexlify(self.chksum(dsa))
+        dsa += binascii.unhexlify('BB')
+        print(dsa)
+
+        # na serverskoj strani salje se na .171
+        server_address = ('192.168.1.116', 80)
+        sent = sock.sendto(dsa, server_address)
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+        sock.bind(('0.0.0.0', 80))
+        data, address = sock.recvfrom(512)
+        if data[0] == 1:
+            print('proso uspesno')
+        else:
+            print('neuspesno')
+        sock.close()
+
+
+
+    def paket_za_odazivanje(self):
+        dsa = binascii.unhexlify('DDDDDD0100')
+        asd = bytes(dsa)
+
+        time_now = datetime.datetime.now()
+        timee = time_now.timetuple()
+        dsa += bytes([timee.tm_mday]) + bytes([timee.tm_mon]) + bytes([18]) + bytes([timee.tm_hour]) + bytes(
+            [timee.tm_min]) + bytes([20])
+
+        dsa += binascii.unhexlify('000000000000000000000000000000000000000000000000000000000000000000000000')
+        dsa += binascii.unhexlify(self.chksum(dsa))
+        dsa += binascii.unhexlify('BB')
+        return dsa
 
 
     @api.one
@@ -425,39 +934,39 @@ class HotelRoom(models.Model):
         if self.isroom is True:
             self.status = 'available'
 
-    @api.multi
-    def write(self, vals):
-        """
-        Overrides orm write method.
-        @param self: The object pointer
-        @param vals: dictionary of fields value.
-        """
-        if 'isroom' in vals and vals['isroom'] is False:
-            vals.update({'color': 2, 'status': 'occupied'})
-        if 'isroom'in vals and vals['isroom'] is True:
-            vals.update({'color': 5, 'status': 'available'})
-        ret_val = super(HotelRoom, self).write(vals)
-        return ret_val
-
-    @api.multi
-    def set_room_status_occupied(self):
-        """
-        This method is used to change the state
-        to occupied of the hotel room.
-        ---------------------------------------
-        @param self: object pointer
-        """
-        return self.write({'isroom': False, 'color': 2})
-
-    @api.multi
-    def set_room_status_available(self):
-        """
-        This method is used to change the state
-        to available of the hotel room.
-        ---------------------------------------
-        @param self: object pointer
-        """
-        return self.write({'isroom': True, 'color': 5})
+    # @api.multi
+    # def write(self, vals):
+    #     """
+    #     Overrides orm write method.
+    #     @param self: The object pointer
+    #     @param vals: dictionary of fields value.
+    #     """
+    #     if 'isroom' in vals and vals['isroom'] is False:
+    #         vals.update({'color': 2, 'status': 'occupied'})
+    #     if 'isroom'in vals and vals['isroom'] is True:
+    #         vals.update({'color': 5, 'status': 'available'})
+    #     ret_val = super(HotelRoom, self).write(vals)
+    #     return ret_val
+    #
+    # @api.multi
+    # def set_room_status_occupied(self):
+    #     """
+    #     This method is used to change the state
+    #     to occupied of the hotel room.
+    #     ---------------------------------------
+    #     @param self: object pointer
+    #     """
+    #     return self.write({'isroom': False, 'color': 2})
+    #
+    # @api.multi
+    # def set_room_status_available(self):
+    #     """
+    #     This method is used to change the state
+    #     to available of the hotel room.
+    #     ---------------------------------------
+    #     @param self: object pointer
+    #     """
+    #     return self.write({'isroom': True, 'color': 5})
 
     # def __init__(self, cr ,ir):
     #

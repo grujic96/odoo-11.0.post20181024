@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        
+        <record id="view_product_publish_unpublish_wizard_form" model="ir.ui.view">
+            <field name="name">product.published.unpublished.wizard.form</field>
+            <field name="model">product.published.unpublished.wizard</field>
+            <field name="type">form</field>
+            <field name="priority" eval="8"/>
+            <field name="arch" type="xml">
+            <form string="Product Published and Unpublish Wizard">
+                <group>
+                    <field name="website_published" required="1" string="Action"/>
+                </group>
+                <field name="line_ids">
+                    <tree string="Product List" create="false">
+                        <field name="product_id" invisible="1"/>
+                        <field name="product_name" readonly="1"/>
+                    </tree>
+                    <form string="Product List" create="false">
+                        <group>
+                            <field name="product_id" invisible="1"/>
+                            <field name="product_name" readonly="1"/>
+                        </group>
+                    </form>
+                </field>
+                <footer>
+                    <button string="Publish" attrs="{'invisible': [('website_published','=', 'unpublish')]}" type="object" class="oe_highlight" name="get_product_publish_unpublish"/>
+                    <button string="Unpublish" attrs="{'invisible': [('website_published','=', 'publish')]}" type="object" class="oe_highlight" name="get_product_publish_unpublish"/>
+                    or
+                    <button string="Cancel" class="btn-default" special="cancel"/>
+                </footer>
+            </form>
+            </field>
+        </record>
+        
+        <record model="ir.actions.act_window" id="act_open_product_publish_unpublish_wizard_view">
+            <field name="name">Product Publish and Unpublish Wizard</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">product.published.unpublished.wizard</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+        
+        <record model="ir.actions.act_window.view" id="act_open_product_publish_unpublish_wizard_view_form">
+            <field name="act_window_id" ref="act_open_product_publish_unpublish_wizard_view"/>
+            <field name="sequence" eval="20"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_product_publish_unpublish_wizard_form"/>
+        </record>
+        
+    </data>
+</odoo>

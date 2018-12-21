@@ -49,6 +49,8 @@
         </field>
     </record>
 
+
+
     <!-- Tree view of hotel floor -->
     <record id="view_hotel_floor_tree" model="ir.ui.view">
         <field name="name">hotel.floor.tree</field>
@@ -265,6 +267,35 @@
         name="Amenities" action="action_hotel_room_amenities_view_form"
         sequence="2" parent="hotel.menu_amenity" />
 
+    <!-- form view za kartice -->
+    <record id="view_hotel_room_card_form" model="ir.ui.view">
+        <field name="name">hotel.room.card.form</field>
+        <field name="model">hotel.room.card</field>
+        <field name="arch" type="xml">
+            <form >
+                <h3>Broj kartice: <field name="broj_kartice"/> </h3>
+                <h3>Lokacija kartice: <field name="lokacija_kartice"/> </h3>
+                <field name="sobe_lista" invisible="True" />
+                <h3>SOBE: <field name="sobe"  widget="many2many_tags" readonly="True" context="{'id_kartice1':id}"></field></h3>
+                                <field name="provera" invisible="True"/>
+                                <button name="open_wizard"  type="object" string="Dodaj sobe" icon="fa-plus-circle fa-lg o_icon_button"/>
+
+                                <button name="open_wizard_delete" type="object" string="Obrisi sobe"  icon="fa-minus-circle fa-lg o_icon_button" attrs="{'invisible': [('provera','=',False)]}"/>
+
+
+                                <button name="get_card_number" type="object" string ="id kartice" class="oe_highlight"/>
+                                <!-- <button name="provera_kartice" type="object" string="Provera kartice" class="oe_highlight" /> -->
+
+
+
+                                    <!-- <button name="brisanje_kartice" type="object" string ="obrisi sobu" class="oe_highlight" /> -->
+            </form>
+        </field>
+    </record>
+
+
+
+
     <!-- ====== Rooms ====== -->
     <!-- Form view of hotel room -->
     <record id="view_hotel_room_form" model="ir.ui.view">
@@ -302,34 +333,35 @@
 
                                         <field name="sos_status" invisible="1"/>
                                         <div attrs="{'invisible': [('sos_status', '=', False)]}" align="left">
-                                            <H3>SOS: <font color="ad0a15">  <span class="glyphicon glyphicon-alert"></span></font></H3>
+                                            <H3>SOS: <i class="glyphicon glyphicon-alert" style="font-size:20px;color:#ff1111;text-shadow:2px 2px 4px #000000;"></i></H3>
                                         </div>
                                         <div attrs="{'invisible': [('sos_status', '=', True)]}" align="left">
-                                            <H3>SOS: <font color="black">  <span class="glyphicon glyphicon-alert"></span></font></H3>
+                                            <H3>SOS: <i class="glyphicon glyphicon-alert" style="font-size:20px;color:#a8adb5;text-shadow:2px 2px 4px #000000;"></i></H3>
                                         </div>
                                         <field name="poziv_osoblju" invisible="1"/>
                                         <div  attrs="{'invisible': [('poziv_osoblju', '=', False)]}" align="left">
-                                            <H3>Poziv Sobarici: <font color="#037c09"><span class="glyphicon glyphicon-phone-alt"></span></font></H3>
+                                            <H3>Poziv Sobarici: <i class="glyphicon glyphicon-phone-alt" style="font-size:20px;color:#0bdd23;text-shadow:2px 2px 4px #000000;"></i></H3>
                                         </div>
                                         <div  attrs="{'invisible': [('poziv_osoblju', '=', True)]}" align="left">
-                                            <H3>Poziv Sobarici: <font color="black"><span class="glyphicon glyphicon-phone-alt"></span></font></H3>
+                                            <H3>Poziv Sobarici: <i class="glyphicon glyphicon-phone-alt" style="font-size:20px;color:#a8adb5;text-shadow:2px 2px 4px #000000;"></i></H3>
                                         </div>
                                         <field name="do_not_disturb" invisible="1"/>
                                         <div  attrs="{'invisible': [('do_not_disturb', '=', False)]}" align="left">
 
-                                            <H3>Do not disturb: <font color="#037c09"><span class="glyphicon glyphicon-minus-sign"></span></font></H3>
+                                            <H3>Do not disturb: <i class="glyphicon glyphicon-minus-sign" style="font-size:20px;color:#0bdd23;text-shadow:2px 2px 4px #000000;"></i></H3>
                                         </div>
                                         <div  attrs="{'invisible': [('do_not_disturb', '=', True)]}" align="left">
 
-                                            <H3>Do not disturb: <font color="black"><span class="glyphicon glyphicon-minus-sign"></span></font></H3>
+                                            <H3>Do not disturb: <i class="glyphicon glyphicon-minus-sign" style="font-size:20px;color:#a8adb5;text-shadow:2px 2px 4px #000000;"></i></H3>
                                         </div>
                                         <field name="gost_status" invisible="1"/>
                                         <div  attrs="{'invisible': [('gost_status', '=', False)]}" align="left">
-                                            <H3>Gost: <font color="#037c09"><span class="glyphicon glyphicon-user"></span></font></H3>
+                                            <H3>Gost: <i class="glyphicon glyphicon-user" style="font-size:20px;color:#0bdd23;text-shadow:2px 2px 4px #000000;"></i></H3>
                                         </div>
                                         <div id="goststatustrue" attrs="{'invisible': [('gost_status', '=', True)]}" align="left">
-                                            <H3>Gost: <font color="black"><span id="asdf" class="glyphicon glyphicon-user" ></span></font></H3>
+                                            <H3>Gost: <i class="glyphicon glyphicon-user" style="font-size:20px;color:#a8adb5;text-shadow:2px 2px 4px #000000;"></i></H3>
                                         </div>
+
                               </group>
                          </group>
                       </group>
@@ -345,6 +377,7 @@
                                 <field name="sos_status"/>
                                 <field name ="gost_status"/>
                                 <field name ="poziv_osoblju"/>
+                                <field name="kartice" widget="many2many_tags"/>
                                 <field name="uom_id" invisible="1" />
 
                             </group>
@@ -432,15 +465,24 @@
         <field name="name">hotel.room.tree</field>
         <field name="model">hotel.room</field>
         <field name="arch" type="xml">
-            <tree string="Hotel Room" >
+
+            <tree string="Hotel Room">
 
                 <field name="name" />
-                <field name="categ_id" />
-                <field name="list_price" string="Room rate" />
+               <!-- <field name="categ_id" />
+                <field name="list_price" string="Room rate" /> -->
                 <field name="status" />
                 <field name="capacity" />
-                <field name="do_not_disturb" options='{"bg_color": "#4bf442: do_not_disturb == True"}'/>
-                <field name="sos_status" />
+                <field name="floor_id"/>
+                <!--<button name="action_check_ruleset" string="Check ruleset" type="object" icon="fa-question fa-lg"/>
+                <button name="action_open_pattern" string="Show details" type="object" icon="fa-info-circle fa-lg o_icon_button2"/>
+                <button name="action_open_split_block_wizard" string="Split block by exactpoints" type="object" icon="fa-scissors fa-lg"/>
+                <button name="action_open_split_block_wizard_by_departure" string="Split block by departure" type="object" icon="fa-pause fa-lg"/> -->
+                <!--<button name="action_shorten_block" string="Shorten" class="oe_highlight" type="object" context="{'shorten_block_id': id, 'block_id': block_pattern_id, 'day_id': day}"/>-->
+
+
+                <button  name="add_many2many_relation" string="Remove" type="object" icon="fa-plus-circle fa-lg o_icon_button" invisible="context.get('add')" />
+                <button  name="delete_record" string="Remove" type="object" icon="fa-times-circle fa-lg o_icon_button1"  invisible="context.get('delete')"/>
 
             </tree>
         </field>
@@ -566,6 +608,7 @@
                 <field name="sos_status" options='{"bg_color": "#fff95b: sos_status == True"}' align="center" />
                 <field name="poziv_osoblju" options='{"bg_color": "#fff95b: poziv_osoblju == True"}'/>
                 <field name="gost_status" string="Gost" options='{"bg_color": "#fff95b: gost_status == True"}'/>
+
                 <field name="floor_id" invisible="True"/>
             </tree>
 
@@ -627,6 +670,9 @@
                                         </H3>
                                     </div>
                                     <ul>
+                                        <li>
+
+                                        </li>
                                         <field name="status" invisible="1"/>
                                         <li attrs="{'invisible': [('status', '=', 'occupied')]}">
                                             <H3>
@@ -634,42 +680,40 @@
                                                 
                                             </H3>
                                         </li>
+
                                         <li attrs="{'invisible': [('status', '=', 'available')]}">
                                             <H3>
                                                 <font color="red">Occupied</font>
-
                                             </H3>
                                         </li>
                                         <div class="row">
                                         <field name="sos_status" invisible="1"/>
-                                        <div class="col-sm-1" attrs="{'invisible': [('sos_status', '=', False)]}" align="center">
-                                            <H3><font color="ad0a15">  <span class="glyphicon glyphicon-alert"></span></font></H3>
+                                        <div class="col-sm-1" attrs="{'invisible': [('sos_status', '=', False)]}" align="left" vertical-align="bottom">
+                                            <H3><i class="glyphicon glyphicon-alert" style="font-size:20px;color:#ff1111;text-shadow:2px 2px 4px #000000;"></i></H3>
                                         </div>
                                         <div class="col-sm-1" attrs="{'invisible': [('sos_status', '=', True)]}" align="center">
-                                            <H3><font color="black">  <span class="glyphicon glyphicon-alert"></span></font></H3>
+                                             <H3><i class="glyphicon glyphicon-alert" style="font-size:20px;color:#a8adb5;text-shadow:2px 2px 4px #000000;"></i></H3>
                                         </div>
                                         <field name="poziv_osoblju" invisible="1"/>
                                         <div class="col-sm-1" attrs="{'invisible': [('poziv_osoblju', '=', False)]}" align="center">
-                                            <H3><font color="#037c09"><span class="glyphicon glyphicon-phone-alt"></span></font></H3>
+                                            <H3><i class="glyphicon glyphicon-phone-alt" style="font-size:20px;color:#0bdd23;text-shadow:2px 2px 4px #000000;"></i></H3>
                                         </div>
                                         <div class="col-sm-1" attrs="{'invisible': [('poziv_osoblju', '=', True)]}" align="center">
-                                            <H3><font color="black"><span class="glyphicon glyphicon-phone-alt"></span></font></H3>
+                                            <H3><i class="glyphicon glyphicon-phone-alt" style="font-size:20px;color:#a8adb5;text-shadow:2px 2px 4px #000000;"></i></H3>
                                         </div>
                                         <field name="do_not_disturb" invisible="1"/>
-                                        <div class="col-sm-1" attrs="{'invisible': [('do_not_disturb', '=', False)]}" align="center">
-
-                                            <H3><font color="#037c09"><span class="glyphicon glyphicon-minus-sign"></span></font></H3>
+                                        <div class="col-sm-1" attrs="{'invisible': [('do_not_disturb', '=', False)]}" align="left" vertical-align="top">
+                                            <H3><i class="glyphicon glyphicon-minus-sign" style="font-size:20px;color:#0bdd23;text-shadow:2px 2px 4px #000000;"></i></H3>
                                         </div>
                                         <div class="col-sm-1" attrs="{'invisible': [('do_not_disturb', '=', True)]}" align="center">
-
-                                            <H3><font color="black"><span class="glyphicon glyphicon-minus-sign"></span></font></H3>
+                                            <H3><i class="glyphicon glyphicon-minus-sign" style="font-size:20px;color:#a8adb5;text-shadow:2px 2px 4px #000000;"></i></H3>
                                         </div>
                                         <field name="gost_status" invisible="1"/>
                                         <div class="col-sm-1" attrs="{'invisible': [('gost_status', '=', False)]}" align="center">
-                                            <H3><font color="#037c09"><span class="glyphicon glyphicon-user"></span></font></H3>
+                                            <H3><i class="glyphicon glyphicon-user" style="font-size:20px;color:#0bdd23;text-shadow:2px 2px 4px #000000;"></i></H3>
                                         </div>
                                             <div class="col-sm-1" attrs="{'invisible': [('gost_status', '=', True)]}" align="center">
-                                                <H3><font color="black"><span class="glyphicon glyphicon-user"></span></font></H3>
+                                                <H3><i class="glyphicon glyphicon-user" style="font-size:20px;color:#a8adb5;text-shadow:2px 2px 4px #000000;"></i></H3>
                                         </div>
                                         </div>
                                     </ul>
@@ -728,6 +772,44 @@
         </field>
     </record>
 
+    <!-- Tree view of hotel room kartice  -->
+
+    <record id="view_hotel_room_card_tree" model="ir.ui.view">
+
+
+        <field name="name">hotel.room.card.tree</field>
+        <field name="model">hotel.room.card</field>
+        <field name="arch" type="xml">
+            <tree string="Hotel Room">
+                <field name="broj_kartice" />
+                <field name="sobe" widget="many2many_tags" context="{'Testiranje':False}"/>
+                <field name="lokacija_kartice"/>
+
+
+            </tree>
+
+        </field>
+    </record>
+
+    <!-- Tree view za programiranje kartice  -->
+
+    <record id="view_hotel_room_card_programming_tree" model="ir.ui.view">
+
+
+        <field name="name">hotel.room.card.tree</field>
+        <field name="model">hotel.room.card</field>
+        <field name="arch" type="xml">
+            <tree string="Hotel Room">
+                <field name="broj_kartice" />
+                <field name="sobe" widget="many2many_tags"/>
+                <field name="lokacija_kartice"/>
+
+
+            </tree>
+
+        </field>
+    </record>
+
     <!-- Action for room_status_change_history -->
 
     <record id="action_hotel_room_status_change_history_form" model="ir.actions.act_window">
@@ -740,8 +822,41 @@
         <field name="view_mode">kanban,tree,form</field>
     </record>
 
+
+
+    <!-- Akcija za kartice -->
+
+    <record id="action_hotel_room_card_form" model="ir.actions.act_window">
+        <field name="name">Room</field>
+        <field name="res_model">hotel.room.card</field>
+        <field name="view_type">form</field>
+       <!-- <field name="context">{'default_isroom':1,'default_rental':1,'default_available_in_pos':0}
+        </field> -->
+        <!--<field name="context">{'active_ids': active_id}</field>-->
+        <field name="view_id" ref="view_hotel_room_card_programming_tree" />
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="action_hotel_room_card_programming_form" model="ir.actions.act_window">
+        <field name="name">Room</field>
+        <field name="res_model">hotel.room.card</field>
+        <field name="view_type">form</field>
+       <!-- <field name="context">{'default_isroom':1,'default_rental':1,'default_available_in_pos':0}
+        </field> -->
+        <field name="view_id" ref="view_hotel_room_card_programming_tree" />
+        <field name="view_mode">tree,form</field>
+    </record>
+
+
+
+
     <menuitem id="menu_open_hotel_room_status_change_history_form" name="Room Status Change History"
         action="action_hotel_room_status_change_history_form" sequence="7" parent="hotel.menu_hotel_room" />
+
+    <menuitem id="menu_open_hotel_room_card_form" name="Kartice"
+        action="action_hotel_room_card_form" sequence="8" parent="hotel.menu_hotel_room" />
+    <menuitem id="menu_open_hotel_room_card_programiranje_form" name="Programiranje Kartice"
+        action="action_hotel_room_card_programming_form" sequence="9" parent="hotel.menu_hotel_room" />
 
 
 

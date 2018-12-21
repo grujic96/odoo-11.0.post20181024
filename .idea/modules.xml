@@ -3,6 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/../../PycharmProjects/FirstProject/.idea/FirstProject.iml" filepath="$PROJECT_DIR$/../../PycharmProjects/FirstProject/.idea/FirstProject.iml" />
+      <module fileurl="file://$USER_HOME$/PycharmProjects/hotel/.idea/hotel.iml" filepath="$USER_HOME$/PycharmProjects/hotel/.idea/hotel.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../Neobk/odoo-11.0.post20181024/neobk/.idea/neobk.iml" filepath="$PROJECT_DIR$/../../Neobk/odoo-11.0.post20181024/neobk/.idea/neobk.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/odoo-11.0.post20181024.iml" filepath="$PROJECT_DIR$/.idea/odoo-11.0.post20181024.iml" />
     </modules>
   </component>
