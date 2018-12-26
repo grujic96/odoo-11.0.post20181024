@@ -7,7 +7,7 @@
                Services Pvt. Ltd., OpenERP SA',
     'category': 'Generic Modules/Hotel Management',
     'website': 'https://github.com/OCA/vertical-hotel/',
-    'depends': ['base','sale_stock', 'point_of_sale'],
+    'depends': ['base','sale_stock', 'point_of_sale', 'hr'],
     'license': 'AGPL-3',
     'summary': 'Hotel Management to Manage Folio and Hotel Configuration',
     'demo': ['views/hotel_data.xml'],

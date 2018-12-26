@@ -104,10 +104,34 @@
         </field>
     </record>
 
+    <!-- Tree view of hotel room type -->
+    <record id="view_hotel_room_card_relation_tree" model="ir.ui.view">
+        <field name="name">hotel.room_card_relation.tree</field>
+        <field name="model">hotel.room.card.relation</field>
+        <field name="arch" type="xml">
+            <tree string="Veze Kartica i soba" default_order="soba_id">
+                <field name="soba_id" />
+                <field name="broj_kartice" />
+                <field name="create_date" string="Datum kreiranja"/>
+                <field name="date_do"/>
+            </tree>
+        </field>
+    </record>
+
+
     <!-- Action for hotel room type -->
     <record id="open_hotel_room_type_form_tree" model="ir.actions.act_window">
         <field name="name">Room Type</field>
         <field name="res_model">hotel.room.type</field>
+        <field name="view_type">form</field>
+        <field name="context">{}</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- Action for hotel room card relation -->
+    <record id="open_hotel_room_card_relation_form_tree" model="ir.actions.act_window">
+        <field name="name">Room Card Relation</field>
+        <field name="res_model">hotel.room.card.relation</field>
         <field name="view_type">form</field>
         <field name="context">{}</field>
         <field name="view_mode">tree,form</field>
@@ -120,6 +144,9 @@
         parent="hotel.menu_hotel_room" />
     <menuitem id="menu_hotel_room" name="Room"
         parent="hotel.hotel_configuration_menu" sequence="2" />
+    <menuitem id="menu_open_hotel_room_card_relation_form_tree" name="Room Card Relation"
+        action="open_hotel_room_card_relation_form_tree" sequence="15"
+        parent="hotel.menu_hotel_room" />
 
     <!--==== Amenities Type ==== -->
     <!-- Form view of hotel room amenities type -->
@@ -277,21 +304,27 @@
                 <h3>Lokacija kartice: <field name="lokacija_kartice"/> </h3>
                 <field name="sobe_lista" invisible="True" />
                 <h3>SOBE: <field name="sobe"  widget="many2many_tags" readonly="True" context="{'id_kartice1':id}"></field></h3>
+
                                 <field name="provera" invisible="True"/>
                                 <button name="open_wizard"  type="object" string="Dodaj sobe" icon="fa-plus-circle fa-lg o_icon_button"/>
 
                                 <button name="open_wizard_delete" type="object" string="Obrisi sobe"  icon="fa-minus-circle fa-lg o_icon_button" attrs="{'invisible': [('provera','=',False)]}"/>
 
 
+                <group>
                                 <button name="get_card_number" type="object" string ="id kartice" class="oe_highlight"/>
                                 <!-- <button name="provera_kartice" type="object" string="Provera kartice" class="oe_highlight" /> -->
-
+                </group>
 
 
                                     <!-- <button name="brisanje_kartice" type="object" string ="obrisi sobu" class="oe_highlight" /> -->
             </form>
         </field>
     </record>
+
+
+
+
 
 
 
@@ -466,22 +499,24 @@
         <field name="model">hotel.room</field>
         <field name="arch" type="xml">
 
-            <tree string="Hotel Room">
+            <tree string="Hotel Room" editable="bottom">
 
                 <field name="name" />
-               <!-- <field name="categ_id" />
-                <field name="list_price" string="Room rate" /> -->
-                <field name="status" />
-                <field name="capacity" />
-                <field name="floor_id"/>
+                <field name="categ_id" />
+                <!-- <field name="list_price" string="Cena nocenja" /> -->
+                <field name="status"  readonly="True"/>
+               <!-- <field name="capacity" readonly = "True"/> -->
+                <field name="floor_id" readonly="True"/>
+                <field name="datum_od" invisible="True" />
+                <field name="datum_do" invisible="context.get('add')"/>
+
+
                 <!--<button name="action_check_ruleset" string="Check ruleset" type="object" icon="fa-question fa-lg"/>
                 <button name="action_open_pattern" string="Show details" type="object" icon="fa-info-circle fa-lg o_icon_button2"/>
                 <button name="action_open_split_block_wizard" string="Split block by exactpoints" type="object" icon="fa-scissors fa-lg"/>
                 <button name="action_open_split_block_wizard_by_departure" string="Split block by departure" type="object" icon="fa-pause fa-lg"/> -->
                 <!--<button name="action_shorten_block" string="Shorten" class="oe_highlight" type="object" context="{'shorten_block_id': id, 'block_id': block_pattern_id, 'day_id': day}"/>-->
-
-
-                <button  name="add_many2many_relation" string="Remove" type="object" icon="fa-plus-circle fa-lg o_icon_button" invisible="context.get('add')" />
+                <button  name="add_many2many_relation" string="DODAJ" type="object" icon="fa-plus-circle fa-lg o_icon_button" invisible="context.get('add')"  context="{'datum_odd':datum_od,'datum_doo':datum_do}" />
                 <button  name="delete_record" string="Remove" type="object" icon="fa-times-circle fa-lg o_icon_button1"  invisible="context.get('delete')"/>
 
             </tree>
@@ -590,8 +625,8 @@
         <field name="view_mode">kanban,tree,form</field>
     </record>
 
-    <menuitem id="menu_open_hotel_room_form" name="Rooms"
-        action="action_hotel_room_form" sequence="5" parent="hotel.menu_hotel_room" />
+    <!-- <menuitem id="menu_open_hotel_room_form" name="Rooms"
+        action="action_hotel_room_form" sequence="5" parent="hotel.menu_hotel_room" /> -->
 
     <!-- Tree view of hotel room status -->
     <record id="view_hotel_room_status_tree" model="ir.ui.view">
@@ -764,7 +799,8 @@
             <tree string="Hotel Room">
                 <field name="broj_sobe" />
                 <field name="ime_statusa" />
-                <field name="time_of_change"  />
+                <field name="time_of_change" />
+
 
 
             </tree>
@@ -793,22 +829,7 @@
 
     <!-- Tree view za programiranje kartice  -->
 
-    <record id="view_hotel_room_card_programming_tree" model="ir.ui.view">
 
-
-        <field name="name">hotel.room.card.tree</field>
-        <field name="model">hotel.room.card</field>
-        <field name="arch" type="xml">
-            <tree string="Hotel Room">
-                <field name="broj_kartice" />
-                <field name="sobe" widget="many2many_tags"/>
-                <field name="lokacija_kartice"/>
-
-
-            </tree>
-
-        </field>
-    </record>
 
     <!-- Action for room_status_change_history -->
 
@@ -833,19 +854,11 @@
        <!-- <field name="context">{'default_isroom':1,'default_rental':1,'default_available_in_pos':0}
         </field> -->
         <!--<field name="context">{'active_ids': active_id}</field>-->
-        <field name="view_id" ref="view_hotel_room_card_programming_tree" />
+        <field name="view_id" ref="view_hotel_room_card_tree" />
         <field name="view_mode">tree,form</field>
     </record>
 
-    <record id="action_hotel_room_card_programming_form" model="ir.actions.act_window">
-        <field name="name">Room</field>
-        <field name="res_model">hotel.room.card</field>
-        <field name="view_type">form</field>
-       <!-- <field name="context">{'default_isroom':1,'default_rental':1,'default_available_in_pos':0}
-        </field> -->
-        <field name="view_id" ref="view_hotel_room_card_programming_tree" />
-        <field name="view_mode">tree,form</field>
-    </record>
+
 
 
 
@@ -855,8 +868,6 @@
 
     <menuitem id="menu_open_hotel_room_card_form" name="Kartice"
         action="action_hotel_room_card_form" sequence="8" parent="hotel.menu_hotel_room" />
-    <menuitem id="menu_open_hotel_room_card_programiranje_form" name="Programiranje Kartice"
-        action="action_hotel_room_card_programming_form" sequence="9" parent="hotel.menu_hotel_room" />
 
 
 

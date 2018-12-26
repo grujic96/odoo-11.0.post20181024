@@ -233,12 +233,52 @@ class HotelRoomStatusChangeHistory(models.Model):
 
 
 
+#TODO NAPRAVI MODEL PODATAKA ZA ZAPOSLENE,GOSTE
+
+class HotelRecepcionist(models.Model):
+    _name = 'hotel.recepcionist'
+    recepcionist_id = fields.Many2one('hr.employee', string = 'Recepcionar')
+
+    kartica = fields.Many2one('hotel.room.card')
+
+
+class HotelGuest(models.Model):
+    _name = 'hotel.guest'
+    ime = fields.Char('Ime')
+    prezime = fields.Char('Prezime')
+
+
+
+class HotelRoomCardRelation(models.Model):
+    _name = 'hotel.room.card.relation'
+
+    kartica_id = fields.Many2one('hotel.room.card', store=True)
+    soba_id = fields.Many2one('hotel.room', store = True)
+    date_od = fields.Datetime('Datum kreiranja')
+    date_do = fields.Datetime('Vazi do')
+    lokacija_kartice = fields.Integer()
+    broj_kartice = fields.Char('Broj kartice',related='kartica_id.broj_kartice', readonly = "True")
+
+
+    def brisanje_po_datumu(self):
+        rooms_cards = self.env['hotel.room.card.relation'].search([])
+        for room_card in rooms_cards:
+            print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+            if room_card.date_do != False:
+                if room_card.date_do < datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"):
+                    _logger.warning('dosaooooo')
+                    rec = self.env['hotel.room']
+                    rec.brisanje_kartice(room_card.lokacija_kartice,room_card.soba_id.id)
+                    room_card.unlink()
+        model = self.env['hotel.room.card']
+
+        model.env['bus.bus'].sendone('auto_refresh', model._name)
+
+
 class HotelRoomCard(models.Model):
     _name = 'hotel.room.card'
     _description = 'kartica'
-
-
-    sobe = fields.Many2many('hotel.room', store=True)
+    sobe = fields.Many2many('hotel.room', 'hotel_room_card_relation', 'kartica_id', 'soba_id', store=True)
     broj_kartice = fields.Char('Broj Kartice')
     lokacija_kartice = fields.Selection([('gost', 'Gost'), ('sobarica', 'Sobarica'), ('recepcionar','Recepcionar')])
 
@@ -289,22 +329,10 @@ class HotelRoomCard(models.Model):
         print('a4 ====' + a4)
         return a4
 
-    # @api.onchange('sobe')
-    # def onchangee(self):
-    #     print(self.sobe_lista)
-    #     print(self.broj_kartice)
-    #     print(self.sobe)
     def open_wizard_delete(self, ids, context=None):
         # context = {'search_default_internal_loc': 1, 'search_default_locationgroup':1}
         res_id = self
         view_id = self.env.ref('hotel.view_hotel_room_tree').id
-        ## first delete previous data
-        #self.env['stock.location.ptemplate'].search([('custom_template_id', '=', res_id)]).unlink()
-        ## then create a new data - by referencing computed field
-        #sbl = self.env['product.template'].search([('id', '=', res_id)]).stock_location
-        #mro_context = {
-        #    'mro_id': self.id,
-        #}
         context = {'id_kartice':self.id}
         dodaj = {'delete': False}
         context.update(dodaj)
@@ -370,6 +398,19 @@ class HotelRoomCard(models.Model):
         }
 
 
+        # return {
+        #     'name': _('Dodaj sobu'),
+        #     'type': 'ir.actions.act_window',
+        #     'view_mode': 'tree',
+        #     'res_model': 'hotel.room',
+        #     'view_id': view_id,
+        #     'target': 'new',
+        #     'context': context,
+        #     'domain':[('id','in',res_id.ids)]
+        #
+        # }
+
+
 
 
     def broj_kartice_usb(self):
@@ -396,9 +437,6 @@ class HotelRoomCard(models.Model):
         b3 = b3[2:4]
         b4 = hex(buffer[4])
         b4 = b4[2:4]
-        #ToDo dodaj adresu sobe i lokaciju kartice dinamicki
-
-        #ToDo dodaj adresu sobe i lokaciju kartice dinamicki
 
         dsa = binascii.unhexlify('DDDDDD01010165000001')
         dsa += binascii.unhexlify(b0)
@@ -512,7 +550,6 @@ class HotelRoomCard(models.Model):
             'target': 'new',
             'context': context,
             'domain': [('id', 'in', res_id.ids)]
-
         }
 
 
@@ -549,20 +586,23 @@ class HotelRoom(models.Model):
     poziv_osoblju = fields.Boolean('Poziv osoblju', default=False )
     gost_status = fields.Boolean('Gost', default=False)
     broj_sobe = fields.Integer('Broj Sobe')
-    kartice = fields.Many2many('hotel.room.card')
+    kartice = fields.Many2many('hotel.room.card', 'hotel_room_card_relation', 'soba_id', 'kartica_id', store=True)
+
+
+    datum_od = fields.Datetime('Vazi od')
+    datum_do = fields.Datetime('Vazi do')
 
 
 
 
 
-
-    def id_by_broj_sobe(self):
-        asd = self.env['hotel.room'].search([("broj_sobe",'=',self.broj_sobe)])
+    def id_by_broj_sobe(self, broj_sobee):
+        asd = self.env['hotel.room'].search([("broj_sobe",'=',broj_sobee)])
         return asd.id
 
     def do_not_disturb_change(self, on_off):
             self.env['hotel.room.status.change'].create({
-                'room_status_change_id': self.id_by_broj_sobe(),
+                'room_status_change_id': self.id_by_broj_sobe(self.broj_sobe),
                 'time_of_change': datetime.datetime.now(),
                 'broj_sobe': self.broj_sobe,
                 'ime_statusa': 'do_not_disturb ' + on_off
@@ -570,7 +610,7 @@ class HotelRoom(models.Model):
 
     def poziv_osoblju_change(self, on_off):
             self.env['hotel.room.status.change'].create({
-                'room_status_change_id': self.id_by_broj_sobe(),
+                'room_status_change_id': self.id_by_broj_sobe(self.broj_sobe),
                 'time_of_change': datetime.datetime.now(),
                 'broj_sobe': self.broj_sobe,
                 'ime_statusa': 'Poziv osoblju ' + on_off
@@ -578,7 +618,7 @@ class HotelRoom(models.Model):
 
     def sos_status_change(self, on_off):
             self.env['hotel.room.status.change'].create({
-                'room_status_change_id': self.id_by_broj_sobe(),
+                'room_status_change_id': self.id_by_broj_sobe(self.broj_sobe),
                 'time_of_change': datetime.datetime.now(),
                 'broj_sobe': self.broj_sobe,
                 'ime_statusa': 'Sos ' + on_off
@@ -586,10 +626,10 @@ class HotelRoom(models.Model):
 
     def gost_status_change(self, on_off):
             self.env['hotel.room.status.change'].create({
-                'room_status_change_id': self.id_by_broj_sobe(),
+                'room_status_change_id': self.id_by_broj_sobe(self.broj_sobe),
                 'time_of_change': datetime.datetime.now(),
                 'broj_sobe': self.broj_sobe,
-                'ime_statusa': on_off
+                'ime_statusa': 'Gost u sobi' + on_off
             })
 
     # @api.onchange('gost_status')
@@ -606,7 +646,8 @@ class HotelRoom(models.Model):
 
     @api.one
     def add_many2many_relation(self):
-
+        if self.datum_do == False:
+            raise ValidationError(_('Niste uneli datum vazenja kartice. '))
         _logger.warning('================_context %s', self._context)
         active_id = self._context.get('id_kartice')
         print('activeid')
@@ -618,18 +659,91 @@ class HotelRoom(models.Model):
         print(self.id)
         _logger.warning('================active_id %s', active_id)
 
-        asd = self.env['hotel.room.card'].browse(active_id)
-
         # _logger.warning('-------------------------------asd%s', asd)
         # for rec in self:
         asd = self.env['hotel.room.card'].browse(active_id)
-        print(asd.broj_kartice)
+        print(asd)
+        records_with_room_iddd = self.env['hotel.room.card.relation'].search([])
+        print(records_with_room_iddd)
 
+        records_with_room_id = []
+        for rec in records_with_room_iddd:
+            ("soba_id", '=', self.id)
+            if rec.soba_id.id == self.id:
+                records_with_room_id.append(rec)
+        lokacije_kartica = []
+        lokacija_kartice_za_upisivanje = None
+        if records_with_room_id != None:
+
+            for rec in records_with_room_id:
+                lokacije_kartica.append(rec.lokacija_kartice)
+
+        print('lokacije_kartice ' + str(lokacije_kartica))
+        if lokacije_kartica == []:
+            if asd.lokacija_kartice == 'gost':
+                lokacija_kartice_za_upisivanje = 1
+            if asd.lokacija_kartice == 'sobarica':
+                lokacija_kartice_za_upisivanje = 4
+            if asd.lokacija_kartice == 'recepcionar':
+                lokacija_kartice_za_upisivanje = 10
+        else:
+
+            if asd.lokacija_kartice == 'gost':
+                if 1 not in lokacije_kartica:
+                    lokacija_kartice_za_upisivanje = 1
+                elif 2 not in lokacije_kartica:
+                    lokacija_kartice_za_upisivanje = 2
+                elif 3 not in lokacije_kartica:
+                    lokacija_kartice_za_upisivanje = 3
+            if asd.lokacija_kartice == 'sobarica':
+                if 4 not in lokacije_kartica:
+                    lokacija_kartice_za_upisivanje = 4
+                elif 5 not in lokacije_kartica:
+                    lokacija_kartice_za_upisivanje = 5
+                elif 6 not in lokacije_kartica:
+                    lokacija_kartice_za_upisivanje = 6
+                elif 7 not in lokacije_kartica:
+                    lokacija_kartice_za_upisivanje = 7
+                elif 8 not in lokacije_kartica:
+                    lokacija_kartice_za_upisivanje = 8
+                elif 9 not in lokacije_kartica:
+                    lokacija_kartice_za_upisivanje = 9
+            if asd.lokacija_kartice == 'recepcionar':
+                if 10 not in lokacije_kartica:
+                    lokacija_kartice_za_upisivanje = 10
+                elif 11 not in lokacije_kartica:
+                    lokacija_kartice_za_upisivanje = 11
+
+
+        if lokacija_kartice_za_upisivanje == None:
+            if asd.lokacija_kartice =='gost':
+                message ="goste"
+            elif asd.lokacija_kartice == 'sobarice':
+                message = "sobarice"
+            else:
+                message = "recepcionare"
+            raise ValidationError(_('Izabrana soba vec ima maksimalan broj kartica za ' + message))
+        print('lokacija kartice za upisivanje je ' + str(lokacija_kartice_za_upisivanje))
+        print(self.id)
+        self.programiranje_kartice(active_id, self.id, lokacija_kartice_za_upisivanje)
+        # UPISUJE RELACIJU IZMEDJU SOBE I KARTICE U BAZI
+        #self.write({'kartice': [(4, active_id, 0)]})
+        datum_do = self._context.get('datum_doo')
+        datum_od= self._context.get('datum_odd')
+        record = self.env['hotel.room.card.relation'].create({'kartica_id' : active_id,'soba_id' : self.id,'date_od' : datum_od,'date_do' : datum_do, 'lokacija_kartice' : lokacija_kartice_za_upisivanje})
+        print('doso123321313')
+        #record.date_od = self.datum_od
+        #record.date_do = self.datum_do
+        #self.env.cr.commit()
+
+        self.datum_do = None
+        self.datum_od = None
         #SALJE PAKET ZA PROGRAMIRANJE GATEWAY-u
-        self.programiranje_kartice(active_id,self.id)
 
-        #UPISUJE RELACIJU IZMEDJU SOBE I KARTICE U BAZI
-        self.write({'kartice': [(4, active_id, 0)]})
+
+
+
+
 
     @api.one
     def delete_record(self):
@@ -651,7 +765,9 @@ class HotelRoom(models.Model):
         print(self.id)
 
         asd = self.env['hotel.room.card'].browse(active_id)
-        self.brisanje_kartice(active_id,self.id)
+        print(asd)
+        hotel_room_card_relation_record = self.env['hotel.room.card.relation'].search([('kartica_id', '=', active_id),('soba_id','=', self.id)])
+        self.brisanje_kartice(hotel_room_card_relation_record.lokacija_kartice,self.id)
 
         self.write({'kartice': [(3,active_id,0)]})
 
@@ -764,8 +880,8 @@ class HotelRoom(models.Model):
             a4 = '0' + str(a4)
         return a4
 
-    def programiranje_kartice(self,id_kartice,id_sobe):
-
+    def programiranje_kartice(self,id_kartice,id_sobe, lokacija_kartice):
+        print('stigo')
         #buffer = self.broj_kartice_usb()
         buffer = self.env['hotel.room.card'].browse(id_kartice)
         buffer = buffer.broj_kartice
@@ -778,28 +894,28 @@ class HotelRoom(models.Model):
         b3 = str(30 + int(buffer[3]))
         b4 = str(30 + int(buffer[4]))
 
-        id_kartice = str(id_kartice)
-        id_kartice = int(id_kartice)
-        id_kartice = hex(id_kartice)
-        id_kartice = str(id_kartice)
-        id_kartice = id_kartice[2:4]
+        lokacija_kartice = str(lokacija_kartice)
+        lokacija_kartice = int(lokacija_kartice)
+        lokacija_kartice = hex(lokacija_kartice)
+        lokacija_kartice = str(lokacija_kartice)
+        lokacija_kartice = lokacija_kartice[2:4]
         #
         id_sobe = str(id_sobe)
 
         if (len(id_sobe)) == 1:
             id_sobe = '0' + id_sobe
 
-        if(len(id_kartice))==1:
-            id_kartice = '0' + id_kartice
+        if(len(lokacija_kartice))==1:
+            lokacija_kartice = '0' + lokacija_kartice
 
         dsa = binascii.unhexlify('DDDDDD0101')
         print(str(id_sobe))
 
         dsa += binascii.unhexlify(id_sobe)
         dsa += binascii.unhexlify('650000')
-        print(id_kartice)
+        print(lokacija_kartice)
         #dsa += binascii.unhexlify(id_kartice)
-        dsa += binascii.unhexlify('01')
+        dsa += binascii.unhexlify('0a')
         dsa += binascii.unhexlify(b0)
         dsa += binascii.unhexlify(b1)
         dsa += binascii.unhexlify(b2)
@@ -837,6 +953,8 @@ class HotelRoom(models.Model):
         id_kartice = str(id_kartice)
         id_kartice = id_kartice[2:4]
         id_sobe = str(id_sobe)
+
+
 
         if (len(id_sobe)) == 1:
             id_sobe = '0' + id_sobe
