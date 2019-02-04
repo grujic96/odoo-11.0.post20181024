@@ -442,18 +442,19 @@
                     </h1>
                  </div>
                     <group>
+                        <field name="status" invisible="True"/>
                         <div class="container">
                             <h2>
-                                Status Sobe: <field name="status"/>
-                            </h2>
-                            <h2>
-                                Room Rate: <field name="list_price"/>€
+                                Status Sobe: <span attrs="{'invisible': [('status', '=', 'available')]}" style="color:red">Occupied</span><span attrs="{'invisible': [('status', '=', 'occupied')]}" style="color:green">Available</span>
                             </h2>
                             <h2>
                                 Hodnik: <field name="hodnik"/>
                             </h2>
                             <h2>
-                                RoomType: <field name="categ_id"/>
+                                Room Type: <field name="categ_id"/>
+                            </h2>
+                            <h2>
+                                Room Rate: <field name="list_price"/>€
                             </h2>
                             <div class="row">
 
@@ -726,17 +727,15 @@
         <field name="name">hotel.room.tree</field>
         <field name="model">hotel.room</field>
         <field name="arch" type="xml">
-            <tree string="Hotel Room" default_order='floor_id, name'>
-
+            <tree string="Hotel Room" default_order='last_status_change desc,floor_id, name'>
+                <field name="last_status_change" invisible="True"/>
                 <field name="name" />
                 <field name="status" />
-                <field name="do_not_disturb" options='{"bg_color": "#fff95b: do_not_disturb == True"}'/>
-                <field name="sos_status" options='{"bg_color": "#fff95b: sos_status == True"}' align="center" />
-                <field name="poziv_osoblju" options='{"bg_color": "#fff95b: poziv_osoblju == True"}'/>
-                <field name="gost_status" string="Gost" options='{"bg_color": "#fff95b: gost_status == True"}'/>
-
+                <field name="do_not_disturb" options='{"bg_color": "#0bdd23: do_not_disturb == True;#a8adb5: do_not_disturb == False"}'/>
+                <field name="sos_status" options='{"bg_color": "#ff1111: sos_status == True;#a8adb5: sos_status == False"}' align="center" />
+                <field name="poziv_osoblju" options='{"bg_color": "#0bdd23: poziv_osoblju == True;#a8adb5: poziv_osoblju == False"}'/>
+                <field name="gost_status" string="Gost" options='{"bg_color": "#0bdd23: gost_status == True;#a8adb5: gost_status == False"}'/>
                 <field name="list_price" string="Room rate" />
-
                 <field name="floor_id" invisible="True"/>
             </tree>
 
@@ -972,7 +971,7 @@
         <field name="name">hotel.room.status.change.history.tree</field>
         <field name="model">hotel.room.status.change</field>
         <field name="arch" type="xml">
-            <tree string="Hotel Room">
+            <tree string="Hotel Room" default_order="time_of_change desc">
                 <field name="broj_sobe" />
                 <field name="ime_statusa" />
                 <field name="time_of_change" />

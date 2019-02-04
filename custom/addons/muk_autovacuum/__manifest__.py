@@ -35,7 +35,7 @@
     'data': [
         'security/ir.model.access.csv',
         'views/rules.xml',
-        'data/rules.xml',
+       # 'data/rules.xml',
     ],
     'qweb': [
         'static/src/xml/*.xml',

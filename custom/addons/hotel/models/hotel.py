@@ -226,7 +226,6 @@ class HotelRoomStatusChangeHistory(models.Model):
     room_status_change_id = fields.Many2one('hotel.room', 'Hotel Room id')
     time_of_change = fields.Datetime('Vreme Promene')
     broj_sobe = fields.Integer("Broj sobe")
-    #ime_statusa = fields.Selection([('sos_status', 'Sos_status'), ('do_not_disturb', 'Do not disturb')], 'Promenjeni status')
 
 
     ime_statusa = fields.Char('Promenjeni status')
@@ -234,20 +233,6 @@ class HotelRoomStatusChangeHistory(models.Model):
 
 
 #TODO NAPRAVI MODEL PODATAKA ZA ZAPOSLENE,GOSTE
-
-class HotelRecepcionist(models.Model):
-    _name = 'hotel.recepcionist'
-    recepcionist_id = fields.Many2one('hr.employee', string = 'Recepcionar')
-
-    kartica = fields.Many2one('hotel.room.card')
-
-
-class HotelGuest(models.Model):
-    _name = 'hotel.guest'
-    ime = fields.Char('Ime')
-    prezime = fields.Char('Prezime')
-
-
 
 class HotelRoomCardRelation(models.Model):
     _name = 'hotel.room.card.relation'
@@ -285,8 +270,7 @@ class HotelRoomCard(models.Model):
     sobe_lista = fields.Char(store=True)
     provera = fields.Boolean(default=True)
 
-
-
+    hotel_room_card_relation = fields.One2many('hotel.room.card.relation','kartica_id')
 
     def get_card_number(self):
 
@@ -350,7 +334,7 @@ class HotelRoomCard(models.Model):
 
         return {
             'name': _('Dodaj sobu'),
-            'type': 'ir.actions.act_window',
+            'type': 'ir.actions.act_window.view',
             'view_mode': 'tree',
             'res_model': 'hotel.room',
             'view_id': view_id,
@@ -397,18 +381,6 @@ class HotelRoomCard(models.Model):
 
         }
 
-
-        # return {
-        #     'name': _('Dodaj sobu'),
-        #     'type': 'ir.actions.act_window',
-        #     'view_mode': 'tree',
-        #     'res_model': 'hotel.room',
-        #     'view_id': view_id,
-        #     'target': 'new',
-        #     'context': context,
-        #     'domain':[('id','in',res_id.ids)]
-        #
-        # }
 
 
 
@@ -530,26 +502,40 @@ class HotelRoomCard(models.Model):
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         server_address = ('192.168.1.171', 80)
         sent = sock.sendto(dsa, server_address)
+class HotelRoomPrikaz(models.Model):
+    _name = 'hotel.room.prikaz'
+    name = fields.Char()
+    hotel_room = fields.One2many('hotel.room','mapa_soba')
+    asd = fields.Char()
+
+    sos_status1 = fields.Boolean('sos1',default=False)
+    do_not_disturb1 = fields.Boolean('do_not_disturb1', default=False)
+    poziv_osoblju1 = fields.Boolean('poziv1', default=False)
+    gost_status1 = fields.Boolean('gost1', default=False)
+
+    sos_status2 = fields.Boolean('sos1', default=False)
+    do_not_disturb2 = fields.Boolean('do_not_disturb1', default=False)
+    poziv_osoblju2 = fields.Boolean('poziv1', default=False)
+    gost_status2 = fields.Boolean('gost1', default=False)
+
+
+
 
     def find_card_by_card_number(self):
-        cards = self.env['hotel.room.card'].search([])
-        print('usosss')
-        context =  None
-        view_id = self.env.ref('hotel.view_hotel_room_card_tree').id
-        res_id = self
-       # for rec in cards:
-            #if rec.broj_kartice == '0000000':
-               # res_id = rec
 
+
+        view_id = self.env.ref('hotel.view_hotel_room_mapa_soba_form').id
+        res_id = self.env['hotel.room.prikaz'].search(['id','=', 1])
+        context = None
         return {
-            'name': _('Dodaj sobu'),
+            'name': _('Sobe'),
             'type': 'ir.actions.act_window',
-            'view_mode': 'tree',
-            'res_model': 'hotel.room',
+            'view_mode': 'form',
+            'res_model': 'hotel.room.prikaz',
             'view_id': view_id,
-            'target': 'new',
+            'res_id': res_id,
+            'target': 'current',
             'context': context,
-            'domain': [('id', 'in', res_id.ids)]
         }
 
 
@@ -578,8 +564,9 @@ class HotelRoom(models.Model):
                                     string='Room Reservation Line')
     product_manager = fields.Many2one('res.users', 'Product Manager')
 
-    #promena statusa
     hotel_room_status_change_id = fields.One2many('hotel.room.status.change' , 'room_status_change_id')
+
+
     do_not_disturb = fields.Boolean('Do Not Disturb', default=False)
     sos = fields.Boolean('SOS', default = False)
     sos_status = fields.Boolean('Sos status', default = False)
@@ -588,13 +575,104 @@ class HotelRoom(models.Model):
     broj_sobe = fields.Integer('Broj Sobe')
     kartice = fields.Many2many('hotel.room.card', 'hotel_room_card_relation', 'soba_id', 'kartica_id', store=True)
 
-
     datum_od = fields.Datetime('Vazi od')
     datum_do = fields.Datetime('Vazi do')
+    mapa_soba = fields.Many2one('hotel.room.prikaz','hotel_room')
+
+    hodnik = fields.Selection([('a', 'A'), ('b', 'B'), ('c', 'C'), ('d', 'D')])
+
+    last_status_change = fields.Datetime(default=False,compute="last_status_change_compute", store=True)
+
+    @api.one
+    @api.depends('sos_status','poziv_osoblju', 'gost_status','do_not_disturb')
+    def last_status_change_compute(self):
+        self.last_status_change = datetime.datetime.now()
 
 
 
 
+    @api.one
+    def open_room_status_form_view(self):
+        view_id = self.env.ref('hotel.view_hotel_room_status_form').id
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': 'hotel.room',
+            'name': 'Testing',
+            'view_mode': 'form',
+
+            'view_id': view_id,
+            'res_id':  self.id,
+            'target': 'current',
+        }
+
+
+    def find_card_by_card_number(self):
+        lista = []
+        print('usosss')
+        context = {'conte':False}
+        view_id = self.env.ref('hotel.view_hotel_room_mapa_soba_form').id
+        self.asd = str({'asd':False})
+        sobe = self.env['hotel.room'].search([])
+        res_id = self.id
+        prikaz = self.env['hotel.room.prikaz'].search([('id', '=', 1)])
+        sobica = self.env['hotel.room'].search([('broj_sobe', '=', 11)])
+        prikaz.sos_status1 = sobica.sos_status
+        for rec in sobe:
+            lista.append(rec)
+            x = 'brojsobe'+ str(rec.id)
+
+            sos_status_true = x + 'sos_status_true'
+            sos_status_false = x + 'sos_status_false'
+
+            gost_status_true = x + 'gost_status_true'
+            gost_status_false = x + 'gost_status_false'
+
+
+
+
+            if rec.sos_status == True:
+                prikaz.asd += {sos_status_true: rec.sos_status}
+                prikaz.asd += {sos_status_true: False}
+
+                context.update({sos_status_true: rec.sos_status})
+                context.update({sos_status_false: False})
+            else:
+                #prikaz.asd.update({sos_status_true: rec.sos_status})
+                prikaz.asd += {sos_status_true: False}
+
+                context.update({sos_status_true: False})
+                context.update({sos_status_false: True})
+
+            if rec.gost_status == True:
+                prikaz.asd += {sos_status_true: rec.sos_status}
+                prikaz.asd += {sos_status_true: False}
+
+                context.update({gost_status_true: rec.gost_status})
+                context.update({gost_status_false: False})
+            else:
+                prikaz.asd += {sos_status_true: rec.sos_status}
+                prikaz.asd += {sos_status_true: False}
+
+                context.update({gost_status_true: False})
+                context.update({gost_status_false: True})
+
+            print(context.get('brojsobe1sos_status_true'))
+            print(context.get('brojsobe1sos_status_false'))
+            print(context.get('brojsobe1gost_status_true'))
+            print(context.get('brojsobe1gost_status_false'))
+            print(rec.id)
+        res_id = self.env['hotel.room.prikaz'].search([('id', '=', 1)])
+        print('asd je' + str(res_id.asd))
+        return {
+            'name': _('Sobe'),
+            'type': 'ir.actions.act_window',
+            'view_mode': 'form',
+            'res_model': 'hotel.room.prikaz',
+            'view_id': view_id,
+            'res_id': res_id.id,
+            'target': 'new',
+            'context': context,
+        }
 
     def id_by_broj_sobe(self, broj_sobee):
         asd = self.env['hotel.room'].search([("broj_sobe",'=',broj_sobee)])
@@ -631,18 +709,6 @@ class HotelRoom(models.Model):
                 'broj_sobe': self.broj_sobe,
                 'ime_statusa': 'Gost u sobi' + on_off
             })
-
-    # @api.onchange('gost_status')
-    # def do_not_disturb_change(self):
-    #     for rec in self:
-    #         self.env['hotel.room.status.change'].create({
-    #             'room_status_change_id': rec.id_by_broj_sobe(),
-    #             'time_of_change': datetime.datetime.now(),
-    #             'broj_sobe': rec.broj_sobe,
-    #             'ime_statusa': 'gost_status'
-    #
-    #         })
-
 
     @api.one
     def add_many2many_relation(self):
@@ -773,8 +839,7 @@ class HotelRoom(models.Model):
 
     @api.multi
     def status_soba(self):
-        #self.env['bus.bus'].sendone('auto_refresh', self._name)
-        #threading.Timer(10.0, status_sobaa).start()
+
         i = 0
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.bind(('0.0.0.0', 80))
@@ -857,9 +922,6 @@ class HotelRoom(models.Model):
                             room.gost_status = 'false'
 
             i += 1
-
-
-           # time.sleep(5)
 
     def chksum(self, dsa):
         a1 = bytearray(dsa)
@@ -1032,14 +1094,6 @@ class HotelRoom(models.Model):
                 raise ValidationError(_('Room capacity must be more than 0'))
 
 
-
-   # @api.onchange('sos')
-   # def sos_change(self):
-    #    if self.sos is True:
-     #       self.sos_status = 'true'
-      #  if self.sos is False:
-       #     self.sos_status = 'false'
-
     @api.onchange('isroom')
     def isroom_change(self):
         '''
@@ -1052,61 +1106,39 @@ class HotelRoom(models.Model):
         if self.isroom is True:
             self.status = 'available'
 
-    # @api.multi
-    # def write(self, vals):
-    #     """
-    #     Overrides orm write method.
-    #     @param self: The object pointer
-    #     @param vals: dictionary of fields value.
-    #     """
-    #     if 'isroom' in vals and vals['isroom'] is False:
-    #         vals.update({'color': 2, 'status': 'occupied'})
-    #     if 'isroom'in vals and vals['isroom'] is True:
-    #         vals.update({'color': 5, 'status': 'available'})
-    #     ret_val = super(HotelRoom, self).write(vals)
-    #     return ret_val
-    #
-    # @api.multi
-    # def set_room_status_occupied(self):
-    #     """
-    #     This method is used to change the state
-    #     to occupied of the hotel room.
-    #     ---------------------------------------
-    #     @param self: object pointer
-    #     """
-    #     return self.write({'isroom': False, 'color': 2})
-    #
-    # @api.multi
-    # def set_room_status_available(self):
-    #     """
-    #     This method is used to change the state
-    #     to available of the hotel room.
-    #     ---------------------------------------
-    #     @param self: object pointer
-    #     """
-    #     return self.write({'isroom': True, 'color': 5})
+    @api.multi
+    def write(self, vals):
+        """
+        Overrides orm write method.
+        @param self: The object pointer
+        @param vals: dictionary of fields value.
+        """
+        if 'isroom' in vals and vals['isroom'] is False:
+            vals.update({'color': 2, 'status': 'occupied'})
+        if 'isroom'in vals and vals['isroom'] is True:
+            vals.update({'color': 5, 'status': 'available'})
+        ret_val = super(HotelRoom, self).write(vals)
+        return ret_val
 
-    # def __init__(self, cr ,ir):
-    #
-    #     thread = threading.Thread(target=self.run, args=())
-    #     thread.daemon = True  # Daemonize thread
-    #     thread.start()  # Start the execution
-    # @api.multi
-    # def run(self):
-    #     """ Method that runs forever """
-    #     while True:
-    #         self.status_soba()
-    #         print('doso')
-    #         print('proso')
-    #         print('Doing something imporant in the background')
-    #
-    #         time.sleep(self.interval)
+    @api.multi
+    def set_room_status_occupied(self):
+        """
+        This method is used to change the state
+        to occupied of the hotel room.
+        ---------------------------------------
+        @param self: object pointer
+        """
+        return self.write({'isroom': False, 'color': 2})
 
-# example = HotelRoom()
-# time.sleep(7)
-# print('Checkpoint')
-# time.sleep(7)
-# print('Bye')
+    @api.multi
+    def set_room_status_available(self):
+        """
+        This method is used to change the state
+        to available of the hotel room.
+        ---------------------------------------
+        @param self: object pointer
+        """
+        return self.write({'isroom': True, 'color': 5})
 
 
 
@@ -1941,11 +1973,3 @@ class AccountInvoice(models.Model):
             folio.write({'hotel_invoice_id': res.id,
                          'invoice_status': 'invoiced'})
         return res
-class RoomStatus(models.Model):
-    _name = 'room.status'
-
-    do_not_disturb = fields.Boolean('Do Not disturb')
-    sos_status = fields.Selection([('true', 'Ukljucen'), ('false', 'Iskljucen')], 'Sos Status', default='false')
-    poziv_osoblju = fields.Selection([('true', 'gost je pozvao osoblje'), ('false', '')])
-    gost_status = fields.Selection([('true', 'gost je u sobi'), ('false', 'soba je prazna')])
-    broj_sobe = fields.Integer('Broj Sobe')

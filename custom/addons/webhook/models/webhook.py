@@ -274,8 +274,18 @@ class Webhook(models.Model):
 
 
 
-
+        print('dosoo11111')
         model = self.env['hotel.room']
         model.env['bus.bus'].sendone('auto_refresh', model._name)
+
+        # hotel_room_prikaz = self.env['hotel.room.prikaz'].search([("id", '=', 1)])
+        # hotel_room_prikaz.sos_status1 = data_record['sos_status']
+        # hotel_room_prikaz.poziv_osoblju1 = data_record['poziv_osoblju']
+        # hotel_room_prikaz.gost_status1 = data_record['gost_status']
+        # hotel_room_prikaz.do_not_disturb1 = data_record['do_not_disturb']
+        #
+        # model = self.env['hotel.room.prikaz']
+        # model.env['bus.bus'].sendone('auto_refresh', model._name)
         print(json.loads(headers))
+        print('dosoooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo')
 

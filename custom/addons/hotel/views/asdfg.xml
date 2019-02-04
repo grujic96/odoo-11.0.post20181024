@@ -1,0 +1,97 @@
+<odoo>
+    <record model="ir.actions.act_window" id="traffic.action_list_daily_departures">
+        <field name="name">Daily departures</field>
+        <field name="res_model">traffic.departure.day</field>
+        <field name="view_mode">tree,form,kanban</field>
+    </record>
+
+
+
+                                            <field name="num_crew_members" readonly="1"/>
+                                            <field name="driver_ids" widget="many2many_tags" attrs="{'readonly': [('day_state', '!=', 'drivers_and_vehicles')]}" domain="[('day_id', '=', depday_id)]"/>
+
+
+    <record id="traffic.departure_days_kanban_view" model="ir.ui.view">
+        <field name="name">traffic.departure.day.kanban</field>
+        <field name="model">traffic.departure.day</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="date">
+                <field name="name" />
+                <field name="status" />
+                <field name="color" />
+                <field name="lst_price" />
+                <field name="id" />
+                <field name="code" />
+                <templates>
+                    <t t-name="kanban-box">
+                        <div
+                            t-attf-class="oe_kanban_color_#{kanban_getcolor(record.color.raw_value)} oe_kanban_card oe_kanban_global_click">
+                            <div class="o_dropdown_kanban dropdown" groups="base.group_user">
+                                <a class="dropdown-toggle btn" data-toggle="dropdown" href="#">
+                                    <span class="fa fa-bars fa-lg" />
+                                </a>
+                                <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+                                    <t t-if="widget.editable">
+                                        <li>
+                                            <a type="edit">Edit</a>
+                                        </li>
+                                    </t>
+                                    <t t-if="widget.deletable">
+                                        <li>
+                                            <a type="delete">Delete</a>
+                                        </li>
+                                    </t>
+                                    <li>
+                                        <ul class="oe_kanban_colorpicker" data-field="color" />
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="oe_kanban_details" style='margin-top: -5px;'>
+                                <div class="oe_kanban_content">
+                                    <div class="oe_kanban_project_list">
+                                        <H3>
+                                            <a type="open">
+                                                <img
+                                                    t-att-src="kanban_image('fleet.vehicle', 'image_medium', record.id.value)"
+                                                    style="height:70px;width:70px" class="oe_avatar oe_kanban_avatar_smallbox" />
+                                                <t t-if="record.code.raw_value" style="margin-right: 10px">
+                                                    [
+                                                    <field name="code" />
+                                                    ]
+                                                </t>
+                                                <field name="name" />
+                                            </a>
+                                        </H3>
+                                    </div>
+                                    <div name="tags" />
+                                    <ul>
+                                        <li>
+                                            Autobus:
+                                            <field name="name"></field>
+                                        </li>
+                                        <li>
+                                            Sluzb. broj vozaca:
+                                            <field name="driver_ids" widget="many2many_tags" attrs="{'readonly': [('day_state', '!=', 'drivers_and_vehicles')]}" domain="[('day_id', '=', depday_id)]"/>
+                                        </li>
+                                        <li>
+                                            Relacije:
+                                            <div col="4" align="left" vertical-align="bottom">
+                                                <field name="start_station"></field>
+                                                <field name="end_station"></field>
+                                                <field name="start_time"></field>
+                                                <field name="end_time"></field>
+                                            </div>
+                                        </li>
+
+
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="oe_clear"></div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+</odoo>
